@@ -1,0 +1,27 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+target=$(uci -q get duckdump.target.nic)
+
+start() {
+	/usr/bin/duckdump $target
+	
+	if [ $? -eq 0 ];then
+		echo "duckdump start [target: ${target}]"
+	else
+		echo 'duckdump error'
+	fi
+}
+
+stop() {
+	killall /usr/bin/duckdump
+	echo 'duckdump stop'
+}
+
+restart() {
+	stop > /dev/null
+	sleep 1
+	start > /dev/null
+	echo 'duckdump restart'
+}
