@@ -12,11 +12,11 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)$(PKG_VERSION)-$(PKG_RELEASE)
 include $(INCLUDE_DIR)/package.mk
 
 define Package/duckdump
-    SECTION:=utakamo
     CATEGORY:=utakamo
+    SECTION:=utakamo
+    TITLE:=utakamo packet capture
     DEPENDS:=+libpcap
     TARGET_LDFLAGS+=-lpcap
-    TITLE:=utakamo packet capture
 endef
 
 define Package/duckdump/description
