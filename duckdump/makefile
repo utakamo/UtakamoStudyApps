@@ -2,7 +2,7 @@ all: duckdump
 
 CC = gcc
 CFLAGS = -Wall
-LDFLAGS =
+LDFLAGS = -lpcap
 
 DEPS = $(wildcard *.h)
 
