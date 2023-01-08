@@ -34,12 +34,10 @@ define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		CC="$(TARGET_CC)" \
 		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" 
+		LDFLAGS="$(TARGET_LDFLAGS)"
 endef
 
 define Package/uci-sample01/install
-	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_CONF) ./files/etc/config/uci-sample01.config $(1)/etc/config/uci-sample01
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/uci-sample01 $(1)/usr/bin/uci-sample01
 endef
