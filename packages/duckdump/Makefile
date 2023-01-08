@@ -9,6 +9,8 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)$(PKG_VERSION)-$(PKG_RELEASE)
 #Default PKG_BUILD_DIR
 #PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
+TARGET_LDFLAGS+=-lpcap
+
 include $(INCLUDE_DIR)/package.mk
 
 define Package/duckdump
@@ -16,7 +18,6 @@ define Package/duckdump
     SECTION:=utakamo
     TITLE:=utakamo packet capture
     DEPENDS:=+libpcap
-    TARGET_LDFLAGS+=-lpcap
 endef
 
 define Package/duckdump/description
