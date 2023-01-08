@@ -5,18 +5,18 @@
 
 int main (int argc, char **argv)
 {
-    struct uci_context *c;
+    struct uci_context *ctx;
 
-    c = uci_alloc_context ();
+    ctx = uci_alloc_context ();
 
     printf("\n");
     printf("---list of config packages---\n");
-    printf("next package address :%p\n", c->root.next);
-    printf("prev package address :%p\n\n", c->root.prev);
+    printf("next package address :%p\n", ctx->root.next);
+    printf("prev package address :%p\n\n", ctx->root.prev);
 
     printf("uci runtime flags :");
 
-    switch(c->flags)
+    switch(ctx->flags)
     {
     	case UCI_FLAG_STRICT:
     		printf("UCI_FLAG_STRICT\n");
@@ -34,25 +34,25 @@ int main (int argc, char **argv)
     		printf("UCI_FLAG_SAVE_DELTA\n");
     		break;
     	default:
-    		printf("NO FLAG HIT! (%d)\n", c->flags);
+    		printf("NO FLAG HIT! (%d)\n", ctx->flags);
     		break;
     }
 
-    printf("config directory :%s\n", c->confdir);
-    printf("savedir directory :%s\n\n", c->savedir);
+    printf("config directory :%s\n", ctx->confdir);
+    printf("savedir directory :%s\n\n", ctx->savedir);
 
     printf("---search path for delta files---\n");
-    printf("delta path next :%p\n", c->delta_path.next);
-    printf("delta path prev :%p\n\n", c->delta_path.prev);
+    printf("delta path next :%p\n", ctx->delta_path.next);
+    printf("delta path prev :%p\n\n", ctx->delta_path.prev);
 
     printf("---private---\n");
-    printf("err :%d\n", c->err);
-    printf("internal :%s\n", (c->internal ? "true" : "false") );
-    printf("nested :%s\n", (c->nested ? "true" : "false") );
-    printf("buffer size :%d\n", c->bufsz);
+    printf("err :%d\n", ctx->err);
+    printf("internal :%s\n", (ctx->internal ? "true" : "false") );
+    printf("nested :%s\n", (ctx->nested ? "true" : "false") );
+    printf("buffer size :%d\n", ctx->bufsz);
 
     printf("\n");
 
-    uci_free_context (c);
+    uci_free_context (ctx);
     return 0;
 }
