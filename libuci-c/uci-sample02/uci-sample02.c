@@ -27,53 +27,55 @@ int main (int argc, char **argv)
 	/****************************************/
 
 	printf("\"%s\" is exist\n", argv[1]);
-	
+	printf("argument type :");
 	switch(ptr.target) {
 		case UCI_TYPE_UNSPEC:
-			printf("UCI_TYPE_UNSPEC\n");
+			printf("UCI_TYPE_UNSPEC\n\n");
 			break;
 			
 		case UCI_TYPE_DELTA:
-			printf("UCI_TYPE_DELTA\n");
+			printf("UCI_TYPE_DELTA\n\n");
 			break;
 			
 		case UCI_TYPE_PACKAGE:
-			printf("UCI_TYPE_PACKAGE\n");
+			printf("UCI_TYPE_PACKAGE\n\n");
 			break;
 		case UCI_TYPE_SECTION:
-			printf("UCI_TYPE_SECTION\n");
+			printf("UCI_TYPE_SECTION\n\n");
 			break;
 			
 		case UCI_TYPE_OPTION:
-			printf("UCI_TYPE_OPTION\n");
+			printf("UCI_TYPE_OPTION\n\n");
 			break;
 			
 		case UCI_TYPE_PATH:
-			printf("UCI_TYPE_PATH\n");
+			printf("UCI_TYPE_PATH\n\n");
 			break;
 			
 		case UCI_TYPE_BACKEND:
-			printf("UCI_TYPE_BACKEND\n");
+			printf("UCI_TYPE_BACKEND\n\n");
 			break;
 			
 		case UCI_TYPE_ITEM:
-			printf("UCI_TYPE_UNSPEC\n");
+			printf("UCI_TYPE_UNSPEC\n\n");
 			break;
 			
 		case UCI_TYPE_HOOK:
-			printf("UCI_TYPE_HOOK\n");
+			printf("UCI_TYPE_HOOK\n\n");
 			break;
 	}
 	
-	//ptr->p [uci_package]
-	//ptr->s [uci_section]
-	//ptr->o [uci_option]
-	//ptr->last [uci_element]
-	
+	printf("----[Input Argument Syntax Parsing Result]---\n");
 	printf("package  :%s\n", ptr.package);
 	printf("sectioin :%s\n", ptr.section);
 	printf("option   :%s\n", ptr.option);
-	printf("value    :%s\n", ptr.value);
+	printf("value    :%s\n\n", ptr.value);
+	
+	printf("---[Search Result]---\n");
+	printf("package address :%p\n", ptr.p);
+	printf("section address :%p\n", ptr.s);
+	printf("option address  :%p\n", ptr.o);
+	printf("last address    :%p\n\n", ptr.last);
 	
 	uci_free_context (ctx);
 	return 0;
