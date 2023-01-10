@@ -18,6 +18,7 @@ int main (int argc, char **argv)
 	//今回取り上げるuci_lookup_ptr関数の使い方
 	if (uci_lookup_ptr(ctx, &ptr, argv[1], true) != UCI_OK) {
 		uci_perror (ctx, "specified args error");
+		uci_free_context(ctx);
 		return 1;
 	}
 
