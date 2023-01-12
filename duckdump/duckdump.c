@@ -49,7 +49,7 @@ static void create_daemon()
 		exit(EXIT_SUCCESS);
 
 	umask(0);
-    
+
 	chdir("/");
 
 	int x;
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 	/* tmpfファイルシステム上にduckdumpディレクトリがなければ作成 */
 	if (stat("/tmp/duckdump", &st) == -1)
 		mkdir("/tmp/duckdump", 0777);
-    
+
 	/* 一時ファイルcap.logを書き込みモードでオープン */
 	if((fp = fopen("/tmp/duckdump/cap.log", "w")) == NULL)
 	{
@@ -102,9 +102,9 @@ int main(int argc, char** argv)
 	/* システムが管理するNIC情報を取得 */
 	if(pcap_findalldevs(&ift, errbuf) == 0) {
 		pcap_if_t *it = ift;
-        
+
 		fprintf(fp, "NIC LIST\n");
-        
+
 		while (it)
 		{
 			fprintf(fp, "Device: %s - %s\n", it->name, it->description);
@@ -140,11 +140,11 @@ int main(int argc, char** argv)
 	}
 
 	time_t current_raw_time;
-	struct tm localtime; 
+	struct tm localtime;
 	int line_num = 0;
 
 	/* パケットキャプチャのメイン処理 */
-	while (1)
+	for (;;)
 	{
 		current_raw_time = time(NULL);
 		localtime_r(&current_raw_time, &localtime);
