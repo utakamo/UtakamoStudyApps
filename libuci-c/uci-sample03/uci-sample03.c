@@ -9,7 +9,7 @@ int main (int argc, char **argv)
 	struct uci_ptr ptr;
 
 	if (argc != 2) {
-		printf ("input argument error!\n ex) uci-sample02 network.lan\n");
+		printf ("input argument error!\n ex) uci-sample03 network.lan\n");
 		return 1;
 	}
 
