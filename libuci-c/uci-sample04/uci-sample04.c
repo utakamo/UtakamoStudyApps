@@ -23,14 +23,17 @@ int main (int argc, char **argv)
 
 	uci_lookup_ptr (ctx, &ptr, argv[1], true);
 	
-	if (ptr.o != NULL)
+	//uci show config.section.option (match)
+	if (ptr.o != NULL && ptr.option != NULL)
 		printf ("%s.%s.%s=%s\n", ptr.p->e.name, ptr.s->e.name, ptr.o->e.name, ptr.o->v.string);
-	
-	else if (ptr.s != NULL && ptr.option == NULL) 
-		show_option_value (ptr);
 		
+	//uci show config.section.option (not match)
 	else if (ptr.o != NULL && ptr.option == NULL)
 		printf("not found\n");
+	
+	//uci show config.section
+	else if (ptr.s != NULL && ptr.option == NULL) 
+		show_option_value (ptr);
 		
 	else
 		printf ("Specify up to a section.\n");
