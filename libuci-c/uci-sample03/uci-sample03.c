@@ -3,6 +3,8 @@
 #include <uci.h>
 #include <stdlib.h>
 
+//Source code description Web site URL
+//https://utakamo.com/article/openwrt/library/libuci-c.html
 int main (int argc, char **argv)
 {
 	struct uci_context *ctx;
@@ -15,14 +17,14 @@ int main (int argc, char **argv)
 
 	ctx = uci_alloc_context ();
 
-	//今回取り上げるuci_lookup_ptr関数の使い方
+	//How to use uci_lookup_ptr func
 	if (uci_lookup_ptr (ctx, &ptr, argv[1], true) != UCI_OK) {
 		uci_perror (ctx, "specified args error");
 		uci_free_context (ctx);
 		return 1;
 	}
 
-	//検索成功　中身を表示します。
+	//search success
 	/****************************************/
 	/*	uci_ptr member variables	*/
 	/****************************************/

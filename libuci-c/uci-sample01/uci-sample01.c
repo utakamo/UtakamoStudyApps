@@ -3,6 +3,8 @@
 #include <uci.h>
 #include <stdlib.h>
 
+//Source code description Web site URL
+//https://utakamo.com/article/openwrt/library/libuci-c.html
 int main (int argc, char **argv)
 {
 	struct uci_context *ctx;
