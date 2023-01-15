@@ -17,18 +17,27 @@ int main (int argc, char **argv)
 	ctx = uci_alloc_context ();
 	
 	if (argc != 2) {
-		printf ("input argument error!\n ex) uci-sample03 network.lan\n");
+		printf ("input argument error! specify uci parameter.\n ex) uci-sample03 network.lan\n");
 		return 1;
 	}
 
 	uci_lookup_ptr (ctx, &ptr, argv[1], true);
 	
 	//uci show config.section.option (match)
-	if (ptr.o != NULL && ptr.option != NULL)
-		printf ("%s.%s.%s=%s\n", ptr.p->e.name, ptr.s->e.name, ptr.o->e.name, ptr.o->v.string);
+	if (ptr.o != NULL && ptr.option != NULL) {
+
+		if (ptr.o->type == UCI_TYPE_STRING) {
+			printf ("%s.%s.%s=%s\n", ptr.p->e.name, ptr.s->e.name, ptr.o->e.name, ptr.o->v.string);
+		}
+		
+		else if (ptr.o->type == UCI_TYPE_LIST) {
+			printf("%s.%s.%s=", ptr.p->e.name, ptr.s->e.name, ptr.o->e.name);
+			show_list_value(uci_to_option(&ptr.o->e));
+		}
+	}
 		
 	//uci show config.section.option (not match)
-	else if (ptr.o != NULL && ptr.option == NULL)
+	else if (ptr.o == NULL && ptr.option != NULL)
 		printf("not found\n");
 	
 	//uci show config.section
@@ -36,7 +45,7 @@ int main (int argc, char **argv)
 		show_option_value (ptr);
 		
 	else
-		printf ("Specify up to a section.\n");
+		printf ("specify up to a section.\n");
 	
 	uci_free_context (ctx);
 
@@ -49,9 +58,12 @@ void show_option_value(struct uci_ptr ptr) {
 	uci_foreach_element(&ptr.s->options, e) {
 		struct uci_option *o = uci_to_option(e);
 		
-		if (o->type == UCI_TYPE_STRING) 
+		if (o->type == UCI_TYPE_STRING) {
 			printf ("%s.%s.%s=%s\n", ptr.p->e.name, ptr.s->e.name, o->e.name, o->v.string);
+		}
+		
 		else if (o->type == UCI_TYPE_LIST) {
+			printf("%s.%s.%s=", ptr.p->e.name, ptr.s->e.name, o->e.name);
 			show_list_value(o);
 		}
 	}
@@ -60,7 +72,9 @@ void show_option_value(struct uci_ptr ptr) {
 void show_list_value(struct uci_option *o) {
 	struct uci_element *e;
 	uci_foreach_element(&o->v.list, e) {
-		struct uci_option *o = uci_to_option(e);
-		printf("%s ", o->v.string);
+		//struct uci_option *o = uci_to_option(e);
+		//printf("%s ", o->v.string);
+		printf("\"%s\" ", e->name);
 	}
+	printf("\n");
 }
