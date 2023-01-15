@@ -17,7 +17,7 @@ int main (int argc, char **argv)
 	ctx = uci_alloc_context ();
 	
 	if (argc != 2) {
-		printf ("input argument error! specify uci parameter.\n ex) uci-sample03 network.lan\n");
+		printf ("input argument error! specify uci parameter.\n ex) uci-sample04 network.lan\n");
 		return 1;
 	}
 
