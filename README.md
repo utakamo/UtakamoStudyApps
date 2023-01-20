@@ -2,7 +2,7 @@
 application packages for openwrt
 For now, for learning purposes, MakeFile's SOURCE_DIR specifies a local directory. When compiling, change this part to the path on your PC environment.
 
-ex) /UtakamoApps/package/duckdump/Makefile
+ex) /UtakamoApps/package/duckdump/Makefile<br>
 SOURCE_DIR:=[your local directory path (duckdump c source directory path)]
 
 <a href="https://utakamo.com/">My Blog</a><br>
