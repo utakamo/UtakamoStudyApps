@@ -14,7 +14,7 @@ ex) /UtakamoApps/package/duckdump/Makefile
 SOURCE_DIR:=[your local directory path (duckdump c source directory path)]    
 ```
 
-Then follow these steps to compile.
+Then follow these steps to compile package.
 
 1. Create the following feeds.conf in the OpenWrt directory  
 ```
