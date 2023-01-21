@@ -1,10 +1,16 @@
 # UtakamoApps
-This is application packages for openwrt.  
+This is application packages for openwrt. 
+
+
 For now, for learning purposes, MakeFile's SOURCE_DIR specifies a local directory.  
 When compiling, change this part to the path on your PC environment. (Will change from local to via Git later.)  
 
 ex) /UtakamoApps/package/duckdump/Makefile  
-SOURCE_DIR:=[your local directory path (duckdump c source directory path)]  
+```
+SOURCE_DIR:=[your local directory path (duckdump c source directory path)]    
+```
+
+Then follow these steps to compile.
 
 1. Create the following feeds.conf in the OpenWrt directory  
 ```
