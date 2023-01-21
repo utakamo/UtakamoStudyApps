@@ -18,10 +18,11 @@ Then follow these steps to compile.
 
 1. Create the following feeds.conf in the OpenWrt directory  
 ```
+#~/openwrt/feeds.conf
 src-link utakamo /[your pc path]/UtakamoApps/packages
 ```
 
-2. Execute the following command in the openwrt directory
+2. Execute the following command in the openwrt directory  
 ```
 user:~/openwrt$ ./scripts/feeds update -a
 user:~/openwrt$ ./scripts/feeds install -a -p
