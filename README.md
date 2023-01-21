@@ -39,6 +39,7 @@ The created package is in ~/openwrt/bin/package/utakamo.
 user:~/openwrt$ make package/duckdump/compile
 ```
 
-<a href="https://utakamo.com/">My Blog</a><br>
-<a href="https://utakamo.com/article/openwrt/beginner/intro05.html">duckdumpの解説ページ</a><br>
-<a href="https://utakamo.com/article/openwrt/library/libuci-c.html">uci-sampleXの解説ページ</a>
+# MyWebSite
+[Top Page](https://utakamo.com)  
+[duckdump introduction page](https://utakamo.com/article/openwrt/beginner/intro05.html)  
+[uci-samplexx introduction page](https://utakamo.com/article/openwrt/library/libuci-c.html)  
