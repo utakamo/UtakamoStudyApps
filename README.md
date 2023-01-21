@@ -1,9 +1,13 @@
 # UtakamoApps
 This is application packages for openwrt. 
 
+|  Application  |         description       |
+| :---: | :---  |
+|   duckdump    |   packet capture (IPv4)   |
+|  uci-samplexx |   libuci sample plrogram  |
 
-For now, for learning purposes, MakeFile's SOURCE_DIR specifies a local directory.  
-When compiling, change this part to the path on your PC environment. (Will change from local to via Git later.)  
+Since this is for learning purposes, MakeFile's SOURCE_DIR specifies a local directory.  
+When compiling, please adapt this part to your own PC environment. (Will change from local to via Git later.)    
 
 ex) /UtakamoApps/package/duckdump/Makefile  
 ```
