@@ -1,9 +1,32 @@
 # UtakamoApps
-application packages for openwrt
-For now, for learning purposes, MakeFile's SOURCE_DIR specifies a local directory. When compiling, change this part to the path on your PC environment.
+This is application packages for openwrt.  
+For now, for learning purposes, MakeFile's SOURCE_DIR specifies a local directory.  
+When compiling, change this part to the path on your PC environment. (Will change from local to via Git later.)  
 
-ex) /UtakamoApps/package/duckdump/Makefile<br>
-SOURCE_DIR:=[your local directory path (duckdump c source directory path)]
+ex) /UtakamoApps/package/duckdump/Makefile  
+SOURCE_DIR:=[your local directory path (duckdump c source directory path)]  
+
+1. Create the following feeds.conf in the OpenWrt directory  
+```
+src-link utakamo /[your pc path]/UtakamoApps/packages
+```
+
+2. Execute the following command in the openwrt directory
+```
+user:~/openwrt$ ./scripts/feeds update -a
+user:~/openwrt$ ./scripts/feeds install -a -p
+```
+
+3. Execute "Make menuconfig" and Check the utakamo-->duckdump
+```
+user:~/openwrt$ make menuconfig
+```
+
+4. Compile with the following command  
+The created package is in ~/openwrt/bin/package/utakamo.
+```
+user:~/openwrt$ make package/duckdump/compile
+```
 
 <a href="https://utakamo.com/">My Blog</a><br>
 <a href="https://utakamo.com/article/openwrt/beginner/intro05.html">duckdumpの解説ページ</a><br>
