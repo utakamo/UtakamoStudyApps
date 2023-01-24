@@ -34,7 +34,7 @@ user:~/openwrt$ make menuconfig
 ```
 
 4. Compile with the following command  
-The created package is in ~/openwrt/bin/package/utakamo.
+The created package is in ~/openwrt/bin/packages/[target device chip]/utakamo.
 ```
 user:~/openwrt$ make package/duckdump/compile
 ```
