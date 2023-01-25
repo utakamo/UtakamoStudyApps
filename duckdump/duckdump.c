@@ -194,7 +194,8 @@ void output_logfile(FILE *fp, const u_char* raw_data, struct tm *localtime)
 
 	//ガード処理
 	//EthernetのタイプフィールドがIPv4(0x0800)以外のものは、ここで終了（キャプチャ情報を出力しない）
-	if( frame->upper_protocol_type == INTERNET_PROTOCOL_VERSION_4 )
+	//ネットワークバイトオーダー変換を忘れずに。
+	if( ntohs(frame->upper_protocol_type) != INTERNET_PROTOCOL_VERSION_4 )
 		return;
 
 	/************************************/
