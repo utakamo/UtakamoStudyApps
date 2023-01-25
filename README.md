@@ -38,6 +38,7 @@ The created package is in ~/openwrt/bin/packages/[target device chip]/utakamo.
 ```
 user:~/openwrt$ make package/duckdump/compile
 ```
+If you have never created a firmware image of the target device, then the package creation will fail. In that case, run "make V=s".
 
 # MyWebSite
 [Top Page](https://utakamo.com)  
