@@ -163,8 +163,11 @@ int main(int argc, char** argv)
 		/* 上限に達すると、出力位置を先頭行に戻して出力を続けます */
 		if(line_num >= MAX_LINE_FOR_OUTPUTFILE)
 		{
-			fseek(fp, 0L, SEEK_SET);
-			line_num = 0;
+		    //fseek(fp, 0L, SEEK_SET);
+		    if (freopen("/tmp/duckdump/cap.log", "w", fp) == NULL)
+		    	return EXIT_FAILURE;
+
+		    line_num = 0;
 		}
 
 		/* パケットキャプチャにより、EthernetフレームのRAWデータを取得します */
