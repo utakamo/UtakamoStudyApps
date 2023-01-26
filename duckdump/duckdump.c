@@ -131,7 +131,17 @@ int main(int argc, char** argv)
 	}
 
 	/* パケットキャプチャハンドルを取得します。これはパケットキャプチャ処理の前準備です。 */
-	pcap_handle = pcap_open_live(argv[1], BUFSIZ, 1, 1000, errbuf);
+	/* インタフェースの起動に最大30秒待ちます。 */
+	for (int retry = 0; retry < 5; retry++)
+	{
+		pcap_handle = pcap_open_live(argv[1], BUFSIZ, 1, 1000, errbuf);
+
+		if (pcap_handle != NULL)
+			break;
+
+		sleep(6);
+	}
+
 	if (pcap_handle == NULL)
 	{
 		fprintf(fp, "Couldn't open device %s: %s\n", argv[1], errbuf);
