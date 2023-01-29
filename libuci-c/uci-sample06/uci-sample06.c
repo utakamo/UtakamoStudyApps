@@ -6,9 +6,6 @@
 //Source code description Web site URL
 //https://utakamo.com/article/openwrt/library/libuci-c.html
 
-void show_option_value(struct uci_ptr ptr);
-void show_list_value(struct uci_option *);
-
 int main (int argc, char **argv)
 {
 	struct uci_context *ctx = NULL;
