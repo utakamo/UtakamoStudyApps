@@ -16,7 +16,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/uci-sample05
     CATEGORY:=utakamo
     SECTION:=utakamo
-    TITLE:=libuci(c-libraly) sample program No.5
+    TITLE:=libuci(c-libraly) sample program No.5 [uci_set]
     DEPENDS:=+libuci
 endef
 
