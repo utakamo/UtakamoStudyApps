@@ -23,7 +23,7 @@ int main (int argc, char **argv)
 
 	uci_lookup_ptr (ctx, &ptr, argv[1], true);
 	
-	if (ptr.value)
+	if (ptr.s != 0)
 		ret = uci_delete(ctx, &ptr);
 	else {
 		printf("Parser error\n");
