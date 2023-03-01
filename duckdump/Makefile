@@ -4,7 +4,7 @@ PKG_NAME:=duckdump
 PKG_VERSION:=1.0
 PKG_RELEASE:=1
 
-SOURCE_DIR:=/home/kamo/UtakamoApps/duckdump
+SOURCE_DIR:=./files/src
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)$(PKG_VERSION)-$(PKG_RELEASE)
 #Default PKG_BUILD_DIR
 #PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)

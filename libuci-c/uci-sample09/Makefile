@@ -1,10 +1,10 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=uci-sample01
+PKG_NAME:=uci-sample09
 PKG_VERSION:=1.0
 PKG_RELEASE:=1
 
-SOURCE_DIR:=/home/kamo/UtakamoApps/libuci-c/uci-sample01
+SOURCE_DIR:=./src
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)$(PKG_VERSION)-$(PKG_RELEASE)
 #Default PKG_BUILD_DIR
 #PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
@@ -13,18 +13,18 @@ TARGET_LDFLAGS = -luci
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/uci-sample01
+define Package/uci-sample09
     CATEGORY:=utakamo
     SECTION:=utakamo
-    TITLE:=libuci(c-libraly) sample program No.1 [uci_alloc_context]
+    TITLE:=libuci(c-libraly) sample program No.9 [uci_reorder_section]
     DEPENDS:=+libuci
 endef
 
-define Package/uci-sample01/description
-	program used uci_alloc_context func
+define Package/uci-sample09/description
+	program used uci_add_list func
 endef
 
-#copy src file uci-sample01 to build_dir 
+#copy src file uci-sample09 to build_dir 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
 	cp $(SOURCE_DIR)/* $(PKG_BUILD_DIR)
@@ -37,9 +37,9 @@ define Build/Compile
 		LDFLAGS="$(TARGET_LDFLAGS)"
 endef
 
-define Package/uci-sample01/install
+define Package/uci-sample09/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/uci-sample01 $(1)/usr/bin/uci-sample01
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/uci-sample09 $(1)/usr/bin/uci-sample09
 endef
 
-$(eval $(call BuildPackage,uci-sample01))
+$(eval $(call BuildPackage,uci-sample09))
