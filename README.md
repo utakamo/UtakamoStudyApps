@@ -11,7 +11,7 @@ Then follow these steps to compile package (ex duckdump).
 1. Create the following feeds.conf in the OpenWrt directory  
 ```
 #~/openwrt/feeds.conf
-src-link utakamo /[your pc path]/UtakamoStudyApps/packages
+src-link utakamo /[your pc path]/UtakamoStudyApps
 ```
 
 2. Execute the following command in the openwrt directory  
