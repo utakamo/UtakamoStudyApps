@@ -1,4 +1,4 @@
-# UtakamoApps
+# UtakamoStudyApps
 This is application packages for openwrt. 
 
 |  Application  |         description       |
