@@ -6,7 +6,7 @@
 //Source code description Web site URL
 //https://utakamo.com/article/openwrt/library/libuci-c.html
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 	struct uci_context *ctx = NULL;
 	struct uci_package *p = NULL;
@@ -14,31 +14,31 @@ int main (int argc, char **argv)
 	int ret = UCI_OK;
 
 	if (argc != 3) {
-		printf ("ex) uci-sample06 <config> <section-type>");
+		printf("ex) uci-sample06 <config> <section-type>");
 		return 1;
 	}
 
-	ctx = uci_alloc_context ();
+	ctx = uci_alloc_context();
 	
 	if ((ret = uci_load(ctx, argv[1], &p)) != UCI_OK)
 	{
-		uci_free_context (ctx);
+		uci_free_context(ctx);
 		return 1;
 	}
 
-	if ((ret = uci_add_section (ctx, p, argv[2], &s)) != UCI_OK)
+	if ((ret = uci_add_section(ctx, p, argv[2], &s)) != UCI_OK)
 	{
-		uci_free_context (ctx);
+		uci_free_context(ctx);
 		return 1;
 	}
 	
 	if (ret == UCI_OK)
 	{
-		uci_save (ctx, p);
-		printf ("unamed section :%s\n", s->e.name);
+		uci_save(ctx, p);
+		printf("unamed section :%s\n", s->e.name);
 	}
 	
-	uci_free_context (ctx);
+	uci_free_context(ctx);
 
 	return 0;
 }
