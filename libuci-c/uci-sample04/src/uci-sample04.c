@@ -9,25 +9,25 @@
 void show_option_value(struct uci_ptr ptr);
 void show_list_value(struct uci_option *);
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 	struct uci_context *ctx;
 	struct uci_ptr ptr;
 
-	ctx = uci_alloc_context ();
+	ctx = uci_alloc_context();
 	
 	if (argc != 2) {
 		printf ("input argument error! specify uci parameter.\n ex) uci-sample04 network.lan\n");
 		return 1;
 	}
 
-	uci_lookup_ptr (ctx, &ptr, argv[1], true);
+	uci_lookup_ptr(ctx, &ptr, argv[1], true);
 	
 	//uci show config.section.option (match)
 	if (ptr.o != NULL && ptr.option != NULL) {
 
 		if (ptr.o->type == UCI_TYPE_STRING) {
-			printf ("%s.%s.%s=%s\n", ptr.p->e.name, ptr.s->e.name, ptr.o->e.name, ptr.o->v.string);
+			printf("%s.%s.%s=%s\n", ptr.p->e.name, ptr.s->e.name, ptr.o->e.name, ptr.o->v.string);
 		}
 		
 		else if (ptr.o->type == UCI_TYPE_LIST) {
@@ -42,12 +42,12 @@ int main (int argc, char **argv)
 	
 	//uci show config.section
 	else if (ptr.s != NULL && ptr.option == NULL) 
-		show_option_value (ptr);
+		show_option_value(ptr);
 		
 	else
 		printf ("specify up to a section.\n");
 	
-	uci_free_context (ctx);
+	uci_free_context(ctx);
 
 	return 0;
 }
@@ -59,7 +59,7 @@ void show_option_value(struct uci_ptr ptr) {
 		struct uci_option *o = uci_to_option(e);
 		
 		if (o->type == UCI_TYPE_STRING) {
-			printf ("%s.%s.%s=%s\n", ptr.p->e.name, ptr.s->e.name, o->e.name, o->v.string);
+			printf("%s.%s.%s=%s\n", ptr.p->e.name, ptr.s->e.name, o->e.name, o->v.string);
 		}
 		
 		else if (o->type == UCI_TYPE_LIST) {
