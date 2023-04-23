@@ -1,0 +1,30 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+STOP=10
+
+start() {
+    /usr/bin/sysv-style
+    
+    if [ $? -eq 0 ];then
+        echo "sysv-style start"
+    else
+        echo 'sysv-style error'
+    fi
+}
+
+stop() {
+    killall /usr/bin/sysv-style
+    echo 'sysv-style stop'
+}
+
+restart() {
+    stop > /dev/null
+    sleep 1
+    start > /dev/null
+    echo 'sysv-style restart'
+}
+
+reload() {
+    killall -s 10 /usr/bin/sysv-style
+}

@@ -1,0 +1,19 @@
+#!/bin/sh /etc/rc.common
+
+USE_PROCD=1
+START=99
+STOP=10
+
+start_service() {
+	echo 'procd-style start'
+	procd_open_instance
+	procd_set_param command /usr/bin/procd-style
+	procd_close_instance
+}
+
+reload_service() {
+    echo 'procd-style reload'
+    stop
+    sleep 1
+    start
+}
