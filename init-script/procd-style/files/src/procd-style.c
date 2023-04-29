@@ -92,6 +92,8 @@ int main(int argc, char** argv)
     return EXIT_SUCCESS;
 }
 
+//Reload the uci configuration file.
+//Execution is triggered at startup and [/etc/init.d/procd-style reload].
 void reply() {
 	char user_name[256] = {0};
 	char greeting[256] = {0};
@@ -110,6 +112,7 @@ void reply() {
 	}
 }
 
+//Function equivalent to the uci get command.
 bool uci_get_option(char* str, char* value){
 	struct uci_context *ctx;
 	struct uci_ptr ptr;
@@ -138,6 +141,7 @@ bool uci_get_option(char* str, char* value){
 	return true;
 }
 
+//Function equivalent to the uci set command.
 bool uci_set_option(char* str) {
 	struct uci_context *ctx;
 	struct uci_ptr ptr;
@@ -170,6 +174,7 @@ bool uci_set_option(char* str) {
 	return true;
 }
 
+//Function equivalent to the uci commit command.
 bool uci_commit_one_package(char* str) {
 	struct uci_context *ctx;
 	struct uci_ptr ptr;
