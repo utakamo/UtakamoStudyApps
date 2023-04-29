@@ -13,12 +13,12 @@ include $(INCLUDE_DIR)/package.mk
 define Package/procd-style
     CATEGORY:=utakamo
     SECTION:=init script sample
-    TITLE:=sysv style init script sample 
+    TITLE:=procd style init script sample 
     DEPENDS:=+libuci
 endef
 
 define Package/procd-style/description
-	sysv style init script sample program
+	procd style init script sample program
 endef
 
 #copy src file from procd-style_dir to build_dir 
