@@ -15,8 +15,10 @@
 bool terminate_flg = false;
 bool reload_flg = false;
 
+void reply();
 bool uci_get_option(char*, char*);
 bool uci_set_option(char*);
+bool uci_commit_one_package(char*);
 
 static void create_daemon()
 {
@@ -72,18 +74,18 @@ int main(int argc, char** argv)
 
 	signal(SIGTERM, sigterm_handler);
 	signal(SIGUSR1, sigusr1_handler);
-	
+
 	reply();
 
 	for (;;) {
 		if (terminate_flg)
  			break;
- 
+
  		if (reload_flg) {
  			reply();
  			reload_flg = false;
  		}
- 
+
  		sleep(3);
 	}
 
@@ -96,22 +98,26 @@ void reply() {
 
 	bool is_option = false;
 
+	// uci get sysv-style.test.user
 	is_option = uci_get_option("sysv-style.test.user", user_name);
 
 	if (is_option) {
+		// uci set sysv-style.test.reply=Hello
 		snprintf(greeting, sizeof(greeting), "sysv-style.test.reply=Hello %s!!", user_name);
 		uci_set_option(greeting);
+		// uci commit sysv-style
+		uci_commit_one_package("sysv-style");
 	}
 }
 
 bool uci_get_option(char* str, char* value){
 	struct uci_context *ctx;
 	struct uci_ptr ptr;
-	
+
 	char* param = strdup(str);
 
 	ctx = uci_alloc_context();
-	
+
 	if (ctx == NULL)
 		return false;
 
@@ -126,18 +132,20 @@ bool uci_get_option(char* str, char* value){
 			strcpy(value, ptr.o->v.string);
 		}
 	}
-	
+
 	uci_free_context(ctx);
 	free(param);
 	return true;
 }
 
-bool uci_set_option(char* param) {
+bool uci_set_option(char* str) {
 	struct uci_context *ctx;
 	struct uci_ptr ptr;
 	int ret = UCI_OK;
 
 	ctx = uci_alloc_context();
+
+	char* param = strdup(str);
 
 	if (uci_lookup_ptr(ctx, &ptr, param, true) != UCI_OK) {
 		uci_perror(ctx, "uci set error");
@@ -153,9 +161,34 @@ bool uci_set_option(char* param) {
 		return -1;
 	}
 
-	if (ret == UCI_OK)
+	if (ret == UCI_OK) {
 		uci_save(ctx, ptr.p);
+		uci_commit(ctx, &ptr.p, true);
+	}
 
 	uci_free_context(ctx);
+	return true;
+}
+
+bool uci_commit_one_package(char* str) {
+	struct uci_context *ctx;
+	struct uci_ptr ptr;
+
+	char* config = strdup(str);
+	
+	ctx = uci_alloc_context();
+
+	if (uci_lookup_ptr(ctx, &ptr, config, true) != UCI_OK) {
+		uci_perror(ctx, "uci commit error");
+		return false;
+	}
+
+	if (ptr.p != 0) {
+		if (uci_commit(ctx, &ptr.p, true) != UCI_OK) {
+			uci_perror(ctx, "uci commit error");
+			return false;
+		}
+	}
+
 	return true;
 }
