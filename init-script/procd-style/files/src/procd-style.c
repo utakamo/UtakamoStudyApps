@@ -101,14 +101,14 @@ void reply() {
 	bool is_option = false;
 
 	// uci get sysv-style.test.user
-	is_option = uci_get_option("sysv-style.test.user", user_name);
+	is_option = uci_get_option("procd-style.test.user", user_name);
 
 	if (is_option) {
 		// uci set sysv-style.test.reply=Hello
-		snprintf(greeting, sizeof(greeting), "sysv-style.test.reply=Hello %s!!", user_name);
+		snprintf(greeting, sizeof(greeting), "procd-style.test.reply=Hello %s!!", user_name);
 		uci_set_option(greeting);
 		// uci commit sysv-style
-		uci_commit_one_package("sysv-style");
+		uci_commit_one_package("procd-style");
 	}
 }
 
@@ -180,7 +180,7 @@ bool uci_commit_one_package(char* str) {
 	struct uci_ptr ptr;
 
 	char* config = strdup(str);
-	
+
 	ctx = uci_alloc_context();
 
 	if (uci_lookup_ptr(ctx, &ptr, config, true) != UCI_OK) {
