@@ -6,14 +6,17 @@ STOP=10
 
 start_service() {
 	echo 'procd-style start'
-	procd_open_instance
+	procd_open_instance 'procd-style'
 	procd_set_param command /usr/bin/procd-style
 	procd_close_instance
 }
 
+stop_service() {
+	echo 'procd-style stop'
+	killall /usr/bin/procd-style
+}
+
 reload_service() {
-    echo 'procd-style reload'
-    stop
-    sleep 1
-    start
+	echo 'procd-style reload'
+	procd_set_param reload_signal procd-style USR1
 }

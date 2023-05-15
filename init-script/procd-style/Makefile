@@ -6,7 +6,7 @@ PKG_RELEASE:=1
 
 SOURCE_DIR:=./files/src
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)$(PKG_VERSION)-$(PKG_RELEASE)
-TARGET_LDFLAGS+=-luci
+TARGET_LDFLAGS+=-luci -lubus -lubox
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -14,7 +14,7 @@ define Package/procd-style
     CATEGORY:=utakamo
     SECTION:=init script sample
     TITLE:=procd style init script sample 
-    DEPENDS:=+libuci
+    DEPENDS:=+libuci +libubus +libubox
 endef
 
 define Package/procd-style/description
