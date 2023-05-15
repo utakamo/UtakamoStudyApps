@@ -21,7 +21,7 @@ define Package/uci-sample09
 endef
 
 define Package/uci-sample09/description
-	program used uci_add_list func
+	program used uci_reorder_section func
 endef
 
 #copy src file uci-sample09 to build_dir 

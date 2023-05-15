@@ -21,7 +21,7 @@ define Package/uci-sample12
 endef
 
 define Package/uci-sample12/description
-	program used uci_add_list func
+	program used uci_commit func
 endef
 
 #copy src file uci-sample12 to build_dir 

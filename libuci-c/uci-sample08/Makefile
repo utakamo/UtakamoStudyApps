@@ -21,7 +21,7 @@ define Package/uci-sample08
 endef
 
 define Package/uci-sample08/description
-	program used uci_add_list func
+	program used uci_del_list func
 endef
 
 #copy src file uci-sample08 to build_dir 
