@@ -15,30 +15,22 @@
 #include <libubox/blobmsg.h>
 #include <uci.h>
 
-/* Enum for GSERVER policy order */
-enum {
-	UBUS_SAMPLE_ID,
-	UBUS_SAMPLE_DATA,
-	UBUS_SAMPLE_MSG,
-	__UBUS_SAMPLE_MAX,
-};
+static struct blob_buf blob;
 
 /* Ubus method policy */
 static const struct blobmsg_policy greeting_policy[] =
 {
-	//[UBUS_SAMPLE_STYLE_ID]  = { .name="id", .type=BLOBMSG_TYPE_INT32},
-	//[UBUS_SAMPLE_STYLE_DATA] = { .name="data", .type=BLOBMSG_TYPE_INT32 },
-	[UBUS_SAMPLE_MSG] = { .name="greeting", .type=BLOBMSG_TYPE_STRING },
+	{ .name="one word", .type=BLOBMSG_TYPE_STRING },
 };
 
-static const struct blobmsg_policy config_reload_policy[] = {};
+static const struct blobmsg_policy output_config_policy[] = {};
 
 /* ubus methods */
 static int greeting(struct ubus_context *ctx, struct ubus_object *obj,
 			  struct ubus_request_data *req, const char *method,
 			  struct blob_attr *msg);
 			  
-static int config_reload(struct ubus_context *ctx, struct ubus_object *obj,
+static int output_config(struct ubus_context *ctx, struct ubus_object *obj,
 			  struct ubus_request_data *req, const char *method,
 			  struct blob_attr *msg);
 
@@ -118,26 +110,47 @@ int main(int argc, char** argv)
 }
 
 // Ubus method functions
-//Reload the uci configuration file.
-//Execution is triggered at startup and [/etc/init.d/ubus-sample reload].
+//output the uci configuration file.
+//Execution is triggered at startup and [/etc/init.d/ubus-sample].
 int greeting(struct ubus_context *ctx, struct ubus_object *obj,
 			  struct ubus_request_data *req, const char *method,
 			  struct blob_attr *msg) {
-	/* do something */
+	void *s;
+	blob_buf_init(&blob, 0);
+	blobmsg_add_string(&blob, "reply", "Hmm? Did you call me?");
+	blobmsg_add_string(&blob, "description", "Output sample data as follows");
+	blobmsg_add_string(&blob, "string", "Welcome to ubus world!");
+	blobmsg_add_u8(&blob, "bool1", true);
+	blobmsg_add_u8(&blob, "bool2", false);
+	blobmsg_add_u32(&blob, "numeric data", 100);
+	s = blobmsg_open_table(&blob, "table");
+	blobmsg_add_string(&blob, "element1", "string data");
+	blobmsg_add_u8(&blob, "element2", true);
+	blobmsg_add_u32(&blob, "element3", 200);
+	blobmsg_close_table(&blob, s);
+	ubus_send_reply(ctx, req, blob.head);
 	return 0;
 }
 
-int config_reload(struct ubus_context *ctx, struct ubus_object *obj,
+int output_config(struct ubus_context *ctx, struct ubus_object *obj,
 			  struct ubus_request_data *req, const char *method,
 			  struct blob_attr *msg) {
 
-	char data[256] = {0};
+	char data1[256] = {0};
+	char data2[256] = {0};
+	char data3[256] = {0};
 
 	bool is_option = false;
 	//uci get ubus-sample.test.user
-	is_option = uci_get_option("ubus-sample.test.user", data);
-	
-	
+	uci_get_option("ubus-sample.test.data1", data1);
+	uci_get_option("ubus-sample.test.data2", data2);
+	uci_get_option("ubus-sample.test.data3", data3);
+
+	blob_buf_init(&blob, 0);
+	blobmsg_add_string(&blob, "data1", data1);
+	blobmsg_add_string(&blob, "data2", data2);
+	blobmsg_add_string(&blob, "data3", data3);
+	ubus_send_reply(ctx, req, blob.head);
 	
 	return 0;
 }
@@ -147,7 +160,7 @@ const struct ubus_method ubus_sample_methods[] =
 {
 	/* UBUS_METHOD(method_name, method_call_function, method_policy) */
 	UBUS_METHOD("greeting", greeting, greeting_policy),
-	UBUS_METHOD("config_reload", config_reload, config_reload_policy),
+	UBUS_METHOD("output_config", output_config, output_config_policy),
 };
 
 /* Ubus object type */
