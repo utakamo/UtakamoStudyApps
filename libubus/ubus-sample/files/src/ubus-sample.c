@@ -87,23 +87,26 @@ static void create_daemon()
     }
 }
 
-void sigterm_handler(int signum)
+static void ubus_sample_handle_signal(int signo)
 {
-    terminate_flg = true;
+	uloop_end();
 }
 
-void sigusr1_handler(int signum)
+static void ubus_sample_setup_signals(void)
 {
-    reload_flg = true;
+	struct sigaction s;
+
+	memset(&s, 0, sizeof(s));
+	s.sa_handler = ubus_sample_handle_signal;
+	s.sa_flags = 0;
+	sigaction(SIGTERM, &s, NULL);
 }
+
 
 int main(int argc, char** argv)
 {
 	create_daemon();
-
-	signal(SIGTERM, sigterm_handler);
-	signal(SIGUSR1, sigusr1_handler);
-	
+	ubus_sample_setup_signals();
 	ubus_process();
 
 	return EXIT_SUCCESS;
