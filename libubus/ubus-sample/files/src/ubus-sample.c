@@ -15,26 +15,35 @@
 #include <libubox/blobmsg.h>
 #include <uci.h>
 
+#define FAILED_STRDUP			1
+#define FAILED_ALLOC_UCI_CONTEXT	2
+#define FAILED_EXTRACT_UCI_PARAMETER	3
+#define HIT_UCI_OPTION			4
+#define UCI_SEARCH_NOT_FOUND		5
+
 static struct blob_buf blob;
 
 /* Ubus method policy */
-static const struct blobmsg_policy greeting_policy[] =
+static const struct blobmsg_policy change_option_policy[] =
 {
-	{ .name="one word", .type=BLOBMSG_TYPE_STRING },
+	{ .name="option", .type=BLOBMSG_TYPE_STRING },
+	{ .name="value", .type=BLOBMSG_TYPE_STRING },
 };
 
-static const struct blobmsg_policy output_config_policy[] = {};
+static const struct blobmsg_policy output_option_policy[] = {};
 
 /* ubus methods */
-static int greeting(struct ubus_context *ctx, struct ubus_object *obj,
+static int change_option(struct ubus_context *ctx, struct ubus_object *obj,
 			  struct ubus_request_data *req, const char *method,
 			  struct blob_attr *msg);
-			  
-static int output_config(struct ubus_context *ctx, struct ubus_object *obj,
+
+static int output_option(struct ubus_context *ctx, struct ubus_object *obj,
 			  struct ubus_request_data *req, const char *method,
 			  struct blob_attr *msg);
 
 void ubus_process(void);
+
+int uci_search_option(const char* str);
 
 //Function equivalent to the uci get command.
 bool uci_get_option(char* str, char* value);
@@ -51,40 +60,40 @@ bool reload_flg = false;
 
 static void create_daemon()
 {
-    pid_t pid;
+	pid_t pid;
 
-    pid = fork();
+	pid = fork();
 
-    if (pid < 0)
-        exit(EXIT_FAILURE);
+	if (pid < 0)
+		exit(EXIT_FAILURE);
 
-    if (pid > 0)
-        exit(EXIT_SUCCESS);
+	if (pid > 0)
+		exit(EXIT_SUCCESS);
 
-    if (setsid() < 0)
-        exit(EXIT_FAILURE);
+	if (setsid() < 0)
+		exit(EXIT_FAILURE);
 
-    signal(SIGCHLD, SIG_IGN);
+	signal(SIGCHLD, SIG_IGN);
 
-    signal(SIGHUP, SIG_IGN);
+	signal(SIGHUP, SIG_IGN);
 
-    pid = fork();
+	pid = fork();
 
-    if (pid < 0)
-        exit(EXIT_FAILURE);
+	if (pid < 0)
+		exit(EXIT_FAILURE);
 
-    if (pid > 0)
-        exit(EXIT_SUCCESS);
+	if (pid > 0)
+		exit(EXIT_SUCCESS);
 
-    umask(0);
+	umask(0);
 
-    chdir("/");
+	chdir("/");
 
-    int x;
-     for (x = sysconf(_SC_OPEN_MAX); x>=0; x--)
-    {
-        close(x);
-    }
+	int x;
+	for (x = sysconf(_SC_OPEN_MAX); x>=0; x--)
+	{
+		close(x);
+	}
 }
 
 static void ubus_sample_handle_signal(int signo)
@@ -115,9 +124,10 @@ int main(int argc, char** argv)
 // Ubus method functions
 //output the uci configuration file.
 //Execution is triggered at startup and [/etc/init.d/ubus-sample].
-int greeting(struct ubus_context *ctx, struct ubus_object *obj,
-			  struct ubus_request_data *req, const char *method,
-			  struct blob_attr *msg) {
+int change_option(struct ubus_context *ctx, struct ubus_object *obj,
+				struct ubus_request_data *req, const char *method,
+				struct blob_attr *msg) {
+
 	void *s;
 	blob_buf_init(&blob, 0);
 	blobmsg_add_string(&blob, "reply", "Hmm? Did you call me?");
@@ -135,7 +145,7 @@ int greeting(struct ubus_context *ctx, struct ubus_object *obj,
 	return 0;
 }
 
-int output_config(struct ubus_context *ctx, struct ubus_object *obj,
+int output_option(struct ubus_context *ctx, struct ubus_object *obj,
 			  struct ubus_request_data *req, const char *method,
 			  struct blob_attr *msg) {
 
@@ -154,7 +164,7 @@ int output_config(struct ubus_context *ctx, struct ubus_object *obj,
 	blobmsg_add_string(&blob, "data2", data2);
 	blobmsg_add_string(&blob, "data3", data3);
 	ubus_send_reply(ctx, req, blob.head);
-	
+
 	return 0;
 }
 
@@ -162,8 +172,8 @@ int output_config(struct ubus_context *ctx, struct ubus_object *obj,
 const struct ubus_method ubus_sample_methods[] =
 {
 	/* UBUS_METHOD(method_name, method_call_function, method_policy) */
-	UBUS_METHOD("greeting", greeting, greeting_policy),
-	UBUS_METHOD("output_config", output_config, output_config_policy),
+	UBUS_METHOD("change_option", change_option, change_option_policy),
+	UBUS_METHOD("output_option", output_option, output_option_policy),
 };
 
 /* Ubus object type */
@@ -180,13 +190,59 @@ struct ubus_object ubus_sample_object=
 };
 
 void ubus_process(void) {
-	uloop_init(); 
+	uloop_init();
 	struct ubus_context *ctx = ubus_connect(NULL);
 	ubus_add_uloop(ctx);
 	ubus_add_object(ctx, &ubus_sample_object);
 	uloop_run();
 	uloop_done();
 	return;
+}
+
+int uci_search_option(const char* str) {
+	struct uci_context *ctx;
+	struct uci_ptr ptr;
+	struct uci_element *e;
+	char* input_option = NULL;
+
+	char* param = strdup(str);
+
+	ctx = uci_alloc_context();
+
+	if (param == NULL) {
+		return FAILED_STRDUP;
+	}
+
+	if (ctx == NULL) {
+		return FAILED_ALLOC_UCI_CONTEXT;
+	}
+
+	strtok(param, ".");			//extract <config>
+	strtok(NULL, ".");			//extract <section>
+	input_option = strtok(NULL, ".");	//extract <option>
+
+	if (input_option == NULL) {
+		return FAILED_EXTRACT_UCI_PARAMETER;
+	}
+
+	int lookup_status = uci_lookup_ptr(ctx, &ptr, param, true);
+
+	if (lookup_status != UCI_OK) {
+		return lookup_status;
+	}
+
+	if (ptr.o != NULL) {
+		uci_foreach_element(&ptr.s->options, e) {
+			struct uci_option *o = uci_to_option(e);
+			if (o->type == UCI_TYPE_STRING || o->type == UCI_TYPE_LIST) {
+				if (!strcmp(o->e.name, input_option)) {
+					return HIT_UCI_OPTION;
+				}
+			}
+		}
+	}
+
+	return UCI_SEARCH_NOT_FOUND;
 }
 
 //Function equivalent to the uci get command.
@@ -198,8 +254,13 @@ bool uci_get_option(char* str, char* value){
 
 	ctx = uci_alloc_context();
 
-	if (ctx == NULL)
+	if (param == NULL) {
 		return false;
+	}
+
+	if (ctx == NULL) {
+		return false;
+	}
 
 	if (uci_lookup_ptr(ctx, &ptr, param, true) != UCI_OK) {
 		uci_perror(ctx, "uci set error");
