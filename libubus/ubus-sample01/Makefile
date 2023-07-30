@@ -13,7 +13,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/ubus-sample01
     CATEGORY:=utakamo
     SECTION:=utakamo
-    TITLE:=ubus sample
+    TITLE:=libubus(c-library) Sending, receiving and handling of data
     DEPENDS:=+libuci +libubus +libubox
 endef
 
