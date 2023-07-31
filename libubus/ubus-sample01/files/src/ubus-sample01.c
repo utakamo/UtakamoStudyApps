@@ -15,12 +15,6 @@
 #include <libubox/blobmsg.h>
 #include <uci.h>
 
-#define FAILED_STRDUP			1
-#define FAILED_ALLOC_UCI_CONTEXT	2
-#define FAILED_EXTRACT_UCI_PARAMETER	3
-#define HIT_UCI_OPTION			4
-#define UCI_SEARCH_NOT_FOUND		5
-
 enum {
 	UCI_SET_INFO_OPTION,
 	UCI_SET_INFO_VALUE,
