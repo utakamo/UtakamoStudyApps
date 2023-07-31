@@ -5,6 +5,7 @@ This is application packages for openwrt.
 | :---: | :---  |
 |   duckdump    |   packet capture (IPv4)   |
 |  uci-samplexx |   libuci sample program  |
+| ubus-samplexx |   libubus sample program |
 
 Then follow these steps to compile package (ex duckdump).
 
@@ -36,4 +37,6 @@ If you have never created a firmware image of the target device, then the packag
 # MyWebSite
 [Top Page](https://utakamo.com)  
 [duckdump introduction page](https://utakamo.com/article/openwrt/beginner/intro05.html)  
-[uci-samplexx introduction page](https://utakamo.com/article/openwrt/library/libuci-c.html)  
+[uci-sample01~13 introduction page](https://utakamo.com/article/openwrt/library/libuci-c.html)  
+[ubus-sample01 introduction page](https://utakamo.com/article/openwrt/library/libubus-c-01.html)  
+
