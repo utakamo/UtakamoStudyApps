@@ -246,13 +246,12 @@ const struct ubus_method ubus_sample_methods[] =
 };
 
 /* Ubus object type */
-struct ubus_object_type ubus_sample_obj_type =
-	UBUS_OBJECT_TYPE("ubus_sample_uobj", ubus_sample_methods);
+struct ubus_object_type ubus_sample_obj_type = UBUS_OBJECT_TYPE("ubus-sample01-uobj", ubus_sample_methods);
 
 /* Ubus object */
 struct ubus_object ubus_sample_object=
 {
-	.name = "ubus-sample01", //objpath
+	.name = "sample", //objpath
 	.type = &ubus_sample_obj_type,
 	.methods = ubus_sample_methods,
 	.n_methods = ARRAY_SIZE(ubus_sample_methods),
