@@ -77,44 +77,6 @@ bool uci_set_option(char* str);
 bool terminate_flg = false;
 bool reload_flg = false;
 
-static void create_daemon()
-{
-	pid_t pid;
-
-	pid = fork();
-
-	if (pid < 0)
-		exit(EXIT_FAILURE);
-
-	if (pid > 0)
-		exit(EXIT_SUCCESS);
-
-	if (setsid() < 0)
-		exit(EXIT_FAILURE);
-
-	signal(SIGCHLD, SIG_IGN);
-
-	signal(SIGHUP, SIG_IGN);
-
-	pid = fork();
-
-	if (pid < 0)
-		exit(EXIT_FAILURE);
-
-	if (pid > 0)
-		exit(EXIT_SUCCESS);
-
-	umask(0);
-
-	chdir("/");
-
-	int x;
-	for (x = sysconf(_SC_OPEN_MAX); x>=0; x--)
-	{
-		close(x);
-	}
-}
-
 static void ubus_sample_handle_signal(int signo)
 {
 	uloop_end();
@@ -133,7 +95,6 @@ static void ubus_sample_setup_signals(void)
 
 int main(int argc, char** argv)
 {
-	create_daemon();
 	ubus_sample_setup_signals();
 	ubus_process();
 
@@ -251,7 +212,7 @@ struct ubus_object_type ubus_sample_obj_type = UBUS_OBJECT_TYPE("ubus-sample01-u
 /* Ubus object */
 struct ubus_object ubus_sample_object=
 {
-	.name = "sample", //objpath
+	.name = "sample01", //objpath
 	.type = &ubus_sample_obj_type,
 	.methods = ubus_sample_methods,
 	.n_methods = ARRAY_SIZE(ubus_sample_methods),
