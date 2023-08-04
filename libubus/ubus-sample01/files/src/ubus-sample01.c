@@ -159,7 +159,7 @@ int update_uci_option(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if ((!tb[UCI_SET_INFO_OPTION]) || (!tb[UCI_SET_INFO_VALUE])){
 		blob_buf_init(&blob, 0);
-		blobmsg_add_string(&blob, "Result", "[UCI SET FAILED] NO INPUT JSON DATA!!");
+		blobmsg_add_string(&blob, "Result", "[UCI SET FAILED] NO INPUT or INSUFFICIENT JSON DATA!!");
 		ubus_send_reply(ctx, req, blob.head);
 
 		return -1;
@@ -170,7 +170,7 @@ int update_uci_option(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (!option || !value) {
 		blob_buf_init(&blob, 0);
-		blobmsg_add_string(&blob, "Result", "[UCI SET FAILED] NOT FOUND UCI OPTION!!");
+		blobmsg_add_string(&blob, "Result", "[UCI SET FAILED] ERROR RETRIEVING UCI OPTION!!");
 		ubus_send_reply(ctx, req, blob.head);
 
 		return -1;
