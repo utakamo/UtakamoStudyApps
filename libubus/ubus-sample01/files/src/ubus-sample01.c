@@ -23,24 +23,6 @@ enum {
 
 static struct blob_buf blob;
 
-/* user input json data */
-struct uci_set_data {
-	struct avl_node avl;
-	char *option;
-	char *value;
-};
-
-struct avl_tree uci_set_datas;
-
-const char* find_uci_option(const char *user_input)
-{
-	struct uci_set_data *o;
-	o = avl_find_element(&uci_set_datas, user_input, o, avl);
-	if (!o)
-		return NULL;
-	return o;
-}
-
 /* Ubus method policy */
 static const struct blobmsg_policy check_json_format_policy[] = {};
 static const struct blobmsg_policy show_uci_option_policy[] = {};
@@ -72,10 +54,6 @@ bool uci_get_option(char* str, char* value);
 
 //Function equivalent to the uci set command.
 bool uci_set_option(char* str);
-
-/* GLOBAL VARIABLE DECLARATION */
-bool terminate_flg = false;
-bool reload_flg = false;
 
 static void ubus_sample_handle_signal(int signo)
 {
@@ -147,7 +125,6 @@ int show_uci_option(struct ubus_context *ctx, struct ubus_object *obj,
 
 	return 0;
 }
-
 
 int update_uci_option(struct ubus_context *ctx, struct ubus_object *obj,
 			  struct ubus_request_data *req, const char *method,
