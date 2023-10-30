@@ -4,7 +4,7 @@
 
 void send_event(struct ubus_context *ctx);
 
-int main(int argc, char** argv)
+int main()
 {
 	struct ubus_context *ctx = ubus_connect(NULL);
 
