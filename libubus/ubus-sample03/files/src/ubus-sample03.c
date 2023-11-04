@@ -1,6 +1,4 @@
 #include <libubus.h>
-#include <libubox/blobmsg_json.h>
-#include <libubox/blobmsg.h>
 
 void send_event(struct ubus_context *ctx);
 
