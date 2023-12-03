@@ -70,13 +70,13 @@ static void reply_sample_event(struct ubus_context *ctx, struct ubus_event_handl
 	FILE *fp = NULL;
 	mkdir("/tmp/ubus-sample02", 0755);
 
-	if ((fp = fopen("/tmp/ubus-sample02/reply", "w")) == NULL) {
+	if ((fp = fopen("/tmp/ubus-sample02/reply", "a")) == NULL) {
 		return;
 	}
 
 	reply_cnt++;
 
-	fprintf(fp, "[count:%d], message =%s\n", reply_cnt, message);
+	fprintf(fp, "[count:%d], message = %s\n", reply_cnt, message);
 
 	fclose(fp);
 }
