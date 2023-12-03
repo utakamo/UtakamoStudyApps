@@ -5,16 +5,22 @@
 #include <libubox/uloop.h>
 #include <libubox/blobmsg_json.h>
 
+enum {
+	TEST_MESSAGE,
+	TEST_MAX
+};
+
+static const struct blobmsg_policy test_policy[] = {
+	[TEST_MESSAGE] = { .name = "message", .type = BLOBMSG_TYPE_STRING },
+};
+
+void ubus_process(void);
+static void ubus_sample_handle_signal(int signo);
+static void ubus_sample_setup_signals(void);
+
 static int reply_cnt;
 static void reply_sample_event(struct ubus_context *, struct ubus_event_handler *, const char *, struct blob_attr *);
 
-static void ubus_sample_handle_signal(int signo);
-static void ubus_sample_setup_signals(void);
-void ubus_process(void);
-
-struct ubus_object ubus_sample_object = {};
-
-const char *event = "sample-event";
 struct ubus_event_handler ev = {
 	.cb = reply_sample_event,
 };
@@ -29,8 +35,7 @@ void ubus_process(void) {
 	uloop_init();
 	struct ubus_context *ctx = ubus_connect(NULL);
 	ubus_add_uloop(ctx);
-	ubus_add_object(ctx, &ubus_sample_object);
-	ubus_register_event_handler(ctx, &ev, event);
+	ubus_register_event_handler(ctx, &ev, "sample-event");
 	uloop_run();
 	uloop_done();
 }
@@ -52,7 +57,16 @@ static void ubus_sample_setup_signals(void)
 
 static void reply_sample_event(struct ubus_context *ctx, struct ubus_event_handler *ev,
 			  const char *method, struct blob_attr *msg) {
-	
+
+	struct blob_attr *tb[TEST_MESSAGE];
+	blobmsg_parse(test_policy, TEST_MAX, tb, blob_data(msg), blob_len(msg));
+
+	if (!tb[TEST_MESSAGE]) {
+		return;
+	}
+
+	char *message = blobmsg_get_string(tb[TEST_MESSAGE]);
+
 	FILE *fp = NULL;
 	mkdir("/tmp/ubus-sample02", 0755);
 
@@ -62,7 +76,7 @@ static void reply_sample_event(struct ubus_context *ctx, struct ubus_event_handl
 
 	reply_cnt++;
 
-	fprintf(fp, "count:%d\n", reply_cnt);
+	fprintf(fp, "[count:%d], message =%s\n", reply_cnt, message);
 
 	fclose(fp);
 }
