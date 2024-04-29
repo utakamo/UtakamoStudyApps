@@ -37,8 +37,17 @@ if #wlan.devices >= 1 then
 end
 
 txpower = radio:option(ListValue, "txpower", "TXPOWER")
-txpower:value("5", "5dBm")
-txpower:value("10", "10dBm")
+
+if #wlan.devices >= 1 then
+
+    txpowerlist = ubus_call("iwinfo", "txpowerlist", {device = wlan.devices[1]})
+
+    for _, result in ipairs(txpowerlist.results) do
+	if (result.dbm >= 6) and (result.dbm <= 10) then
+            txpower:value(result.mw, result.dbm .. "dBm")
+        end
+    end
+end
 
 default_radio = m:section(TypedSection, "wifi-iface")
 default_radio.addremove = true
