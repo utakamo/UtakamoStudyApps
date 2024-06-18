@@ -1,0 +1,78 @@
+#/bin/sh
+#setup-sample01
+
+DOWNLOAD_URL="https://github.com/utakamo/UtakamoStudyApps/raw/main/webui/luci-sample-app01/setup/luci-sample-app01.tar.gz"
+TEMP_ARCHIVE_1="/tmp/luci-sample-app01.tar.gz"
+TEMP_ARCHIVE_2="/tmp/luci-sample-app01.tar"
+EXTRACT_DIR="/tmp/luci-sample-app01"
+SRC_DIR="$EXTRACT_DIR/luasrc"
+DST_DIR="/usr/lib/lua/luci"
+
+help() {
+    echo "setup-sample01 insall ... install luci-sample-app01"
+    echo "setup-sample01 remove ... remove luci-sample-app01"
+}
+
+delete_archive_file() {
+    rm -rf "$TEMP_ARCHIVE_1"
+    rm -rf "$TEMP_ARCHIVE_2"
+    rm -rf "$EXTRACT_DIR"
+}
+
+remove_install_file() {
+    rm -rf "$DST_DIR/view/luci-sample-app01/"
+    rm -rf "$DST_DIR/model/cbi/luci-sample-app01"
+    rm -rf "$DST_DIR/controller/luci-sample-app01/"
+}
+
+install() {
+
+    # adjust local time for passing SSL/TLS
+    /etc/init.d/sysntpd restart
+
+    # download
+    wget -O "$TEMP_ARCHIVE_1" "$DOWNLOAD_URL"
+    if [ "$?" -ne 0 ]; then
+        echo "Failed to download $DOWNLOAD_URL" >&2
+        exit 1
+    fi
+
+    # expands
+    mkdir -p "$EXTRACT_DIR"
+    gunzip -c "$TEMP_ARCHIVE_1" | tar -x -C /tmp
+
+    if [ "$?" -ne 0 ]; then
+	echo "Failed to extract $TEMP_ARCHIVE_1" >&2
+	delete_archive_file
+        exit 1
+    fi
+
+    # remove previous file for reinstall
+    remove_install_file
+
+    # create dir and copy
+    mkdir -p "$DST_DIR/view/luci-sample-app01"
+    mkdir -p "$DST_DIR/model/cbi/luci-sample-app01"
+    mkdir -p "$DST_DIR/controller/luci-sample-app01"
+
+    cp -a "$SRC_DIR/view/cbi/desc.htm" "$DST_DIR/view/luci-sample-app01/"
+    cp -a "$SRC_DIR/model/cbi/network.lua" "$DST_DIR/model/cbi/luci-sample-app01/"
+    cp -a "$SRC_DIR/model/cbi/wireless.lua" "$DST_DIR/model/cbi/luci-sample-app01/"
+    cp -a "$SRC_DIR/controller/module.lua" "$DST_DIR/controller/luci-sample-app01/"
+
+    delete_archive_file
+    echo "Setup completed successfully"
+}
+
+remove() {
+    remove_install_file
+    echo "Remove completed successfully"
+}
+
+if [ "$1" = "install" ]; then
+        install
+elif [ "$1" = "remove" ]; then
+        remove
+else
+        help
+fi
