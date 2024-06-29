@@ -1,0 +1,103 @@
+<%+header%>
+<h1>Sample Lua Plugin</h1>
+<form id="sampleForm">
+    <label for="params">UCI CONFIG NAME:</label>
+    <input type="text" id="params" name="params" required>
+    <br>
+    <button type="submit">Execute</button>
+</form>
+<div id="result"></div>
+
+<script type="text/javascript">
+    document.getElementById('sampleForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var params = document.getElementById('params').value;
+
+        fetch('<%=build_url("admin", "status", "sample_lua_plugin", "config_detail")%>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ params: params })
+        })
+        .then(response => response.json())
+        .then(data => {
+            var resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = ''; // Clear previous results
+            resultDiv.appendChild(generateTable(data));
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('result').innerHTML = 'Error: ' + error;
+        });
+    });
+
+    function generateTable(data) {
+        var table = document.createElement('table');
+        table.className = "table"; // Use LuCI table CSS class
+
+        // Create table header
+        var thead = document.createElement('thead');
+        var headerRow = document.createElement('tr');
+        headerRow.className = "tr table-titles";
+        ['Name', 'Type', 'Properties'].forEach(function(text) {
+            var th = document.createElement('th');
+            th.className = "th";
+            th.appendChild(document.createTextNode(text));
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Create table body
+        var tbody = document.createElement('tbody');
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                var row = document.createElement('tr');
+                row.className = "tr";
+
+                // Name column
+                var nameCell = document.createElement('td');
+                nameCell.className = "td";
+                nameCell.appendChild(document.createTextNode(key));
+                row.appendChild(nameCell);
+
+                // Type column
+                var typeCell = document.createElement('td');
+                typeCell.className = "td";
+                typeCell.appendChild(document.createTextNode(data[key][".type"] || ''));
+                row.appendChild(typeCell);
+
+                // Properties column
+                var propertiesCell = document.createElement('td');
+                propertiesCell.className = "td";
+                var propertiesTable = document.createElement('table');
+                propertiesTable.className = "table"; // Use LuCI table CSS class
+
+                for (var prop in data[key]) {
+                    if (data[key].hasOwnProperty(prop) && prop !== '.name' && prop !== '.type') {
+                        var propRow = document.createElement('tr');
+                        propRow.className = "tr";
+                        var propNameCell = document.createElement('td');
+                        propNameCell.className = "td";
+                        propNameCell.appendChild(document.createTextNode(prop));
+                        var propValueCell = document.createElement('td');
+                        propValueCell.className = "td";
+                        propValueCell.appendChild(document.createTextNode(JSON.stringify(data[key][prop])));
+                        propRow.appendChild(propNameCell);
+                        propRow.appendChild(propValueCell);
+                        propertiesTable.appendChild(propRow);
+                    }
+                }
+                propertiesCell.appendChild(propertiesTable);
+                row.appendChild(propertiesCell);
+
+                tbody.appendChild(row);
+            }
+        }
+        table.appendChild(tbody);
+
+        return table;
+    }
+</script>
+<%+footer%>

@@ -1,0 +1,85 @@
+#/bin/sh
+#setup-sample02
+
+DOWNLOAD_URL="https://github.com/utakamo/UtakamoStudyApps/raw/main/webui/luci-sample-app02/setup/luci-sample-app02.tar.gz"
+TEMP_ARCHIVE_1="/tmp/luci-sample-app02.tar.gz"
+TEMP_ARCHIVE_2="/tmp/luci-sample-app02.tar"
+EXTRACT_DIR="/tmp/luci-sample-app02"
+WEBUI_SRC_DIR="$EXTRACT_DIR/webui"
+WEBUI_DST_DIR="/usr/lib/lua/luci"
+PLUGIN_SRC_DIR="$EXTRACT_DIR/src/"
+PLUGIN_DST_DIR="/usr/libexec/rpcd"
+
+help() {
+    echo "setup-sample02 insall ... install luci-sample-app02"
+    echo "setup-sample02 remove ... remove luci-sample-app02"
+}
+
+delete_archive_file() {
+    rm -rf "$TEMP_ARCHIVE_1"
+    rm -rf "$TEMP_ARCHIVE_2"
+    rm -rf "$EXTRACT_DIR"
+}
+
+remove_install_file() {
+    rm -rf "$WEBUI_DST_DIR/view/luci-sample-app02/"
+    rm -rf "$WEBUI_DST_DIR/controller/luci-sample-app02/"
+}
+
+install() {
+
+    # adjust local time for passing SSL/TLS
+    /etc/init.d/sysntpd restart
+
+    # download
+    wget -O "$TEMP_ARCHIVE_1" "$DOWNLOAD_URL"
+    if [ "$?" -ne 0 ]; then
+        echo "Failed to download $DOWNLOAD_URL" >&2
+        exit 1
+    fi
+
+    # expands
+    mkdir -p "$EXTRACT_DIR"
+    gunzip -c "$TEMP_ARCHIVE_1" | tar -x -C /tmp
+
+    if [ "$?" -ne 0 ]; then
+    echo "Failed to extract $TEMP_ARCHIVE_1" >&2
+    delete_archive_file
+        exit 1
+    fi
+
+    # remove previous file for reinstall
+    remove_install_file
+
+    # create dir and copy
+    mkdir -p "$WEBUI_DST_DIR/view/luci-sample-app02"
+    mkdir -p "$WEBUI_DST_DIR/controller/luci-sample-app02"
+
+    # plugin script
+    chmod +x "$PLUGIN_SRC_DIR/libexec/rpcd/*"
+    chmod +x "$PLUGIN_SRC_DIR/usr/bin/*"
+    cp -a "$PLUGIN_SRC_DIR/libexec/rpcd/ash-sample" "$PLUGIN_DST_DIR/"
+    cp -a "$PLUGIN_SRC_DIR/usr/bin/for-ash-sample.lua" "$PLUGIN_DST_DIR/"
+    cp -a "$PLUGIN_SRC_DIR/libexec/rpcd/lua-sample" "$PLUGIN_DST_DIR/"
+
+    # webui
+    cp -a "$WEBUI_SRC_DIR/controller/module.lua" "$WEBUI_DST_DIR/controller/luci-sample-app02/"
+    cp -a "$WEBUI_SRC_DIR/view/sample_ash_plugin.htm" "$WEBUI_DST_DIR/view/luci-sample-app02/"
+    cp -a "$WEBUI_SRC_DIR/view/sample_lua_plugin.htm" "$WEBUI_DST_DIR/view/luci-sample-app02/"
+
+    delete_archive_file
+    echo "Setup completed successfully"
+}
+
+remove() {
+    remove_install_file
+    echo "Remove completed successfully"
+}
+
+if [ "$1" = "install" ]; then
+        install
+elif [ "$1" = "remove" ]; then
+        remove
+else
+        help
+fi

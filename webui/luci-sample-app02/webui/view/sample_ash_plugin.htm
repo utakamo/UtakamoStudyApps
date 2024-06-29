@@ -1,0 +1,170 @@
+<%+header%>
+<h1>Sample Ash Plugin</h1>
+
+<!-- Active Interface List -->
+<h2>Active Interface List</h2>
+<div id="activeIfListResult">Loading...</div>
+
+<!-- Form to fetch IPv4 address of an interface -->
+<h2>Interface IPv4 Address</h2>
+<form id="interfaceIp4Form">
+    <label for="ip4Params">Interface Name:</label>
+    <input type="text" id="ip4Params" name="params" required>
+    <button type="submit">Show IPv4 Address</button>
+</form>
+<div id="interfaceIp4Result"></div>
+
+<!-- Form to fetch MAC address of an interface -->
+<h2>Interface MAC Address</h2>
+<form id="interfaceMacForm">
+    <label for="macParams">Interface Name:</label>
+    <input type="text" id="macParams" name="params" required>
+    <button type="submit">Show MAC Address</button>
+</form>
+<div id="interfaceMacResult"></div>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fetch active interface list on page load
+        var resultDiv = document.getElementById('activeIfListResult');
+        resultDiv.innerHTML = 'Loading...'; // Show loading message
+
+        fetch('<%=build_url("admin", "status", "sample_ash_plugin", "active_if_list")%>', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            displayInterfaceList('activeIfListResult', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            resultDiv.innerHTML = 'Error: ' + error;
+        });
+    });
+
+    // Event listener for IPv4 address form
+    document.getElementById('interfaceIp4Form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var params = document.getElementById('ip4Params').value;
+        fetch('<%=build_url("admin", "status", "sample_ash_plugin", "interface_ip4")%>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ params: params })
+        })
+        .then(response => response.json())
+        .then(data => {
+            displayResult('interfaceIp4Result', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('interfaceIp4Result').innerHTML = 'Error: ' + error;
+        });
+    });
+
+    // Event listener for MAC address form
+    document.getElementById('interfaceMacForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var params = document.getElementById('macParams').value;
+        fetch('<%=build_url("admin", "status", "sample_ash_plugin", "interface_mac")%>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ params: params })
+        })
+        .then(response => response.json())
+        .then(data => {
+            displayResult('interfaceMacResult', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('interfaceMacResult').innerHTML = 'Error: ' + error;
+        });
+    });
+
+    // Function to display active interface list in a table
+    function displayInterfaceList(elementId, data) {
+        var resultDiv = document.getElementById(elementId);
+        resultDiv.innerHTML = ''; // Clear previous results
+
+        var table = document.createElement('table');
+        table.className = 'table'; // Use LuCI table CSS class
+
+        var thead = document.createElement('thead');
+        var headerRow = document.createElement('tr');
+        headerRow.className = 'tr table-titles';
+
+        var headers = ['Interface'];
+        headers.forEach(function(text) {
+            var th = document.createElement('th');
+            th.className = 'th';
+            th.appendChild(document.createTextNode(text));
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        var tbody = document.createElement('tbody');
+        data.interfaces.forEach(function(interfaceName) {
+            var row = document.createElement('tr');
+            row.className = 'tr';
+
+            var cell = document.createElement('td');
+            cell.className = 'td';
+            cell.appendChild(document.createTextNode(interfaceName));
+            row.appendChild(cell);
+
+            tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        resultDiv.appendChild(table);
+    }
+
+    // Function to display result in a table
+    function displayResult(elementId, data) {
+        var resultDiv = document.getElementById(elementId);
+        resultDiv.innerHTML = ''; // Clear previous results
+
+        var table = document.createElement('table');
+        table.className = 'table'; // Use LuCI table CSS class
+
+        var thead = document.createElement('thead');
+        var headerRow = document.createElement('tr');
+        headerRow.className = 'tr table-titles';
+
+        var headers = ['Key', 'Value'];
+        headers.forEach(function(text) {
+            var th = document.createElement('th');
+            th.className = 'th';
+            th.appendChild(document.createTextNode(text));
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        var tbody = document.createElement('tbody');
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                var row = document.createElement('tr');
+                row.className = 'tr';
+
+                var keyCell = document.createElement('td');
+                keyCell.className = 'td';
+                keyCell.appendChild(document.createTextNode(key));
+                row.appendChild(keyCell);
+
+                var valueCell = document.createElement('td');
+                valueCell.className = 'td';
+                valueCell.appendChild(document.createTextNode(JSON.stringify(data[key])));
+                row.appendChild(valueCell);
+
+                tbody.appendChild(row);
+            }
+        }
+        table.appendChild(tbody);
+        resultDiv.appendChild(table);
+    }
+</script>
+<%+footer%>

@@ -1,0 +1,38 @@
+#!/bin/sh
+ 
+case "$1" in
+	list)
+		echo '{ "hello": {}, "active_if_list": {}, "interface_ip4": {"ifname": "str" }, "interface_mac": {"ifname":"str"}}'
+	;;
+	call)
+		case "$2" in
+			hello)
+				echo '{"reply":"Hello User!!!"}'
+			;;
+			active_if_list)
+				interfaces=$(ip link show up | awk '/^[0-9]+: / {print substr($2, 1, length($2)-1)}')
+                    
+				json="{\"interfaces\":["
+                
+				for iface in $interfaces; do
+					json="${json}\"${iface}\","
+				done
+                
+				json="${json%,}]}"
+            
+				echo $json
+			;;
+			interface_ip4)
+				read input
+				lua /usr/bin/for-ash-sample.lua "$2" "$input" 
+			;;
+			interface_mac)
+				read input
+				lua /usr/bin/for-ash-sample.lua "$2" "$input"
+			;;
+		esac
+	;;
+	*)
+		echo '{ "error": "Invalid Argument"}'
+	;;
+esac
