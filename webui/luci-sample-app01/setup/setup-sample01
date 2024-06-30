@@ -27,11 +27,8 @@ remove_install_file() {
 
 install() {
 
-    # adjust local time for passing SSL/TLS
-    /etc/init.d/sysntpd restart
-
     # download
-    wget -O "$TEMP_ARCHIVE_1" "$DOWNLOAD_URL"
+    wget --no-check-certificate -O "$TEMP_ARCHIVE_1" "$DOWNLOAD_URL"
     if [ "$?" -ne 0 ]; then
         echo "Failed to download $DOWNLOAD_URL" >&2
         exit 1
