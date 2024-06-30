@@ -9,6 +9,7 @@ WEBUI_SRC_DIR="$EXTRACT_DIR/webui"
 WEBUI_DST_DIR="/usr/lib/lua/luci"
 PLUGIN_SRC_DIR="$EXTRACT_DIR/src/"
 PLUGIN_DST_DIR="/usr/libexec/rpcd"
+USR_BIN_DIR="/usr/bin"
 
 help() {
     echo "setup-sample02 insall ... install luci-sample-app02"
@@ -28,11 +29,8 @@ remove_install_file() {
 
 install() {
 
-    # adjust local time for passing SSL/TLS
-    /etc/init.d/sysntpd restart
-
     # download
-    wget -O "$TEMP_ARCHIVE_1" "$DOWNLOAD_URL"
+    wget --no-check-certificate -O "$TEMP_ARCHIVE_1" "$DOWNLOAD_URL"
     if [ "$?" -ne 0 ]; then
         echo "Failed to download $DOWNLOAD_URL" >&2
         exit 1
@@ -56,11 +54,12 @@ install() {
     mkdir -p "$WEBUI_DST_DIR/controller/luci-sample-app02"
 
     # plugin script
-    chmod +x "$PLUGIN_SRC_DIR/usr/libexec/rpcd/*"
-    chmod +x "$PLUGIN_SRC_DIR/usr/bin/*"
     cp -a "$PLUGIN_SRC_DIR/usr/libexec/rpcd/ash-sample" "$PLUGIN_DST_DIR/"
-    cp -a "$PLUGIN_SRC_DIR/usr/bin/for-ash-sample.lua" "$PLUGIN_DST_DIR/"
+    cp -a "$PLUGIN_SRC_DIR/usr/bin/for-ash-sample.lua" "$USR_BIN_DIR/"
     cp -a "$PLUGIN_SRC_DIR/usr/libexec/rpcd/lua-sample" "$PLUGIN_DST_DIR/"
+    chmod +x "$PLUGIN_DST_DIR/ash-sample"
+    chmod +x "$USR_BIN_DIR/for-ash-sample.lua"
+    chmod +x "$PLUGIN_DST_DIR/lua-sample"
 
     # webui
     cp -a "$WEBUI_SRC_DIR/controller/module.lua" "$WEBUI_DST_DIR/controller/luci-sample-app02/"
@@ -82,4 +81,4 @@ elif [ "$1" = "remove" ]; then
         remove
 else
         help
-fi    
+fi
