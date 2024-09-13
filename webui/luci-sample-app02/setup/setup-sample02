@@ -54,6 +54,7 @@ install() {
     mkdir -p "$WEBUI_DST_DIR/controller/luci-sample-app02"
 
     # plugin script
+    mkdir -p "$PLUGIN_DST_DIR/"
     cp -a "$PLUGIN_SRC_DIR/usr/libexec/rpcd/ash-sample" "$PLUGIN_DST_DIR/"
     cp -a "$PLUGIN_SRC_DIR/usr/bin/for-ash-sample.lua" "$USR_BIN_DIR/"
     cp -a "$PLUGIN_SRC_DIR/usr/libexec/rpcd/lua-sample" "$PLUGIN_DST_DIR/"
