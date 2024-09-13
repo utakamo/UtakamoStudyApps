@@ -9,7 +9,7 @@ SRC_DIR="$EXTRACT_DIR/luasrc"
 DST_DIR="/usr/lib/lua/luci"
 
 help() {
-    echo "setup-sample01 insall ... install luci-sample-app01"
+    echo "setup-sample01 install ... install luci-sample-app01"
     echo "setup-sample01 remove ... remove luci-sample-app01"
 }
 

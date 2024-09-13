@@ -12,7 +12,7 @@ PLUGIN_DST_DIR="/usr/libexec/rpcd"
 USR_BIN_DIR="/usr/bin"
 
 help() {
-    echo "setup-sample02 insall ... install luci-sample-app02"
+    echo "setup-sample02 install ... install luci-sample-app02"
     echo "setup-sample02 remove ... remove luci-sample-app02"
 }
 
