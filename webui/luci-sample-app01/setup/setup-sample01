@@ -10,7 +10,7 @@ DST_DIR="/usr/lib/lua/luci"
 
 help() {
     echo "setup-sample01 install ... install luci-sample-app01"
-    echo "setup-sample01 remove ... remove luci-sample-app01"
+    echo "setup-sample01 remove  ... remove luci-sample-app01"
 }
 
 delete_archive_file() {
@@ -26,6 +26,19 @@ remove_install_file() {
 }
 
 install() {
+
+    if ! opkg list-installed luci-compat | grep -q "luci-compat"; then
+        echo -n "Do you want to install the luci-compat package? (Y/N) :"
+        read reply
+
+        if [ "$reply" = "Y" ]; then
+            opkg update
+            opkg install luci-compat
+        else
+            echo "luci-sample-app01 install cancelled."
+            exit 1
+        fi
+    fi
 
     # download
     wget --no-check-certificate -O "$TEMP_ARCHIVE_1" "$DOWNLOAD_URL"
@@ -59,6 +72,13 @@ install() {
 
     delete_archive_file
     echo "Setup completed successfully"
+
+    echo -n "System Reboot? (Y/N) :"
+    read reboot
+
+    if [ "$reboot" = Y ]; then
+        reboot
+    fi
 }
 
 remove() {
