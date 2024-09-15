@@ -21,6 +21,8 @@ define Package/luci-sample-app02
     CATEGORY:=utakamo
     SECTION:=utakamo
     TITLE:=luci sample application
+    DEPENDS:=+luci-compat
+    PKGARCH:=all
 endef
 
 define Build/Compile
