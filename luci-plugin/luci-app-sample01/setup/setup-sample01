@@ -5,7 +5,7 @@ DOWNLOAD_URL="https://github.com/utakamo/UtakamoStudyApps/raw/main/luci-plugin/l
 TEMP_ARCHIVE_1="/tmp/luci-app-sample01.tar.gz"
 TEMP_ARCHIVE_2="/tmp/luci-app-sample01.tar"
 EXTRACT_DIR="/tmp/luci-app-sample01"
-SRC_DIR="$EXTRACT_DIR/luasrc"
+SRC_DIR="$EXTRACT_DIR/files/luasrc"
 DST_DIR="/usr/lib/lua/luci"
 
 help() {
