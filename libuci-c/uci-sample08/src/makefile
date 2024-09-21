@@ -2,7 +2,7 @@ all: uci-sample08
 
 CC = gcc
 CFLAGS = -Wall
-LDFLAGS = -libuci
+LDFLAGS = -luci -lubox
 
 DEPS = $(wildcard *.h)
 
@@ -19,4 +19,4 @@ datacheck: $(OBJ)
 .PHONY: clean
 
 clean:
-	rm -f uci-sample08 *.o
+	rm -f uci-sample08 *.o datacheck
