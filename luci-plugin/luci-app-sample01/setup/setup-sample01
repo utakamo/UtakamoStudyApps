@@ -1,16 +1,16 @@
 #/bin/sh
 #setup-sample01
 
-DOWNLOAD_URL="https://github.com/utakamo/UtakamoStudyApps/raw/main/webui/luci-sample-app01/setup/luci-sample-app01.tar.gz"
-TEMP_ARCHIVE_1="/tmp/luci-sample-app01.tar.gz"
-TEMP_ARCHIVE_2="/tmp/luci-sample-app01.tar"
-EXTRACT_DIR="/tmp/luci-sample-app01"
+DOWNLOAD_URL="https://github.com/utakamo/UtakamoStudyApps/raw/main/luci-plugin/luci-app-sample01/setup/luci-app-sample01.tar.gz"
+TEMP_ARCHIVE_1="/tmp/luci-app-sample01.tar.gz"
+TEMP_ARCHIVE_2="/tmp/luci-app-sample01.tar"
+EXTRACT_DIR="/tmp/luci-app-sample01"
 SRC_DIR="$EXTRACT_DIR/luasrc"
 DST_DIR="/usr/lib/lua/luci"
 
 help() {
-    echo "setup-sample01 install ... install luci-sample-app01"
-    echo "setup-sample01 remove  ... remove luci-sample-app01"
+    echo "setup-sample01 install ... install luci-app-sample01"
+    echo "setup-sample01 remove  ... remove luci-app-sample01"
 }
 
 delete_archive_file() {
@@ -20,9 +20,9 @@ delete_archive_file() {
 }
 
 remove_install_file() {
-    rm -rf "$DST_DIR/view/luci-sample-app01/"
-    rm -rf "$DST_DIR/model/cbi/luci-sample-app01"
-    rm -rf "$DST_DIR/controller/luci-sample-app01/"
+    rm -rf "$DST_DIR/view/luci-app-sample01/"
+    rm -rf "$DST_DIR/model/cbi/luci-app-sample01"
+    rm -rf "$DST_DIR/controller/luci-app-sample01/"
 }
 
 install() {
@@ -35,7 +35,7 @@ install() {
             opkg update
             opkg install luci-compat
         else
-            echo "luci-sample-app01 install cancelled."
+            echo "luci-app-sample01 install cancelled."
             exit 1
         fi
     fi
@@ -61,14 +61,14 @@ install() {
     remove_install_file
 
     # create dir and copy
-    mkdir -p "$DST_DIR/view/luci-sample-app01"
-    mkdir -p "$DST_DIR/model/cbi/luci-sample-app01"
-    mkdir -p "$DST_DIR/controller/luci-sample-app01"
+    mkdir -p "$DST_DIR/view/luci-app-sample01"
+    mkdir -p "$DST_DIR/model/cbi/luci-app-sample01"
+    mkdir -p "$DST_DIR/controller/luci-app-sample01"
 
-    cp -a "$SRC_DIR/view/cbi/desc.htm" "$DST_DIR/view/luci-sample-app01/"
-    cp -a "$SRC_DIR/model/cbi/network.lua" "$DST_DIR/model/cbi/luci-sample-app01/"
-    cp -a "$SRC_DIR/model/cbi/wireless.lua" "$DST_DIR/model/cbi/luci-sample-app01/"
-    cp -a "$SRC_DIR/controller/module.lua" "$DST_DIR/controller/luci-sample-app01/"
+    cp -a "$SRC_DIR/view/cbi/desc.htm" "$DST_DIR/view/luci-app-sample01/"
+    cp -a "$SRC_DIR/model/cbi/network.lua" "$DST_DIR/model/cbi/luci-app-sample01/"
+    cp -a "$SRC_DIR/model/cbi/wireless.lua" "$DST_DIR/model/cbi/luci-app-sample01/"
+    cp -a "$SRC_DIR/controller/module.lua" "$DST_DIR/controller/luci-app-sample01/"
 
     delete_archive_file
     echo "Setup completed successfully"

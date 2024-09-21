@@ -1,9 +1,9 @@
 -- module.lua
-module("luci.controller.luci-sample-app02.module", package.seeall)
+module("luci.controller.luci-app-sample02.module", package.seeall)
 
 function index()
-    entry({"admin", "status", "sample_ash_plugin"}, template("luci-sample-app02/sample_ash_plugin"), _("Sample Ash Plugin"), 90)
-    entry({"admin", "status", "sample_lua_plugin"}, template("luci-sample-app02/sample_lua_plugin"), _("Sample Lua Plugin"), 90)
+    entry({"admin", "status", "sample_ash_plugin"}, template("luci-app-sample02/sample_ash_plugin"), _("Sample Ash Plugin"), 90)
+    entry({"admin", "status", "sample_lua_plugin"}, template("luci-app-sample02/sample_lua_plugin"), _("Sample Lua Plugin"), 90)
     entry({"admin", "status", "sample_ash_plugin", "active_if_list"}, call("action_sample_ash_plugin_active_if_list"), nil).leaf = true
     entry({"admin", "status", "sample_ash_plugin", "interface_ip4"}, call("action_sample_ash_plugin_interface_ip4"), nil).leaf = true
     entry({"admin", "status", "sample_ash_plugin", "interface_mac"}, call("action_sample_ash_plugin_interface_mac"), nil).leaf = true
