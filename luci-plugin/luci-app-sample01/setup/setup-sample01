@@ -33,7 +33,9 @@ install() {
 
         if [ "$reply" = "Y" ]; then
             opkg update
-            opkg install luci-compat
+            if ! opkg install luci-compat; then
+                exit 1
+            fi
         else
             echo "luci-app-sample01 install cancelled."
             exit 1
