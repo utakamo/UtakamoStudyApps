@@ -110,7 +110,6 @@ int show_uci_option(struct ubus_context *ctx, struct ubus_object *obj,
 	char data2[256] = {0};
 	char data3[256] = {0};
 
-	bool is_option = false;
 	//uci get ubus-sample01.test.user
 	uci_get_option("ubus-sample01.test.data1", data1);
 	uci_get_option("ubus-sample01.test.data2", data2);
