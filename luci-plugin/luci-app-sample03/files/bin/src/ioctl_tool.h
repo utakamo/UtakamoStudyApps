@@ -31,10 +31,11 @@
 /********************************/
 /*      Address operations      */
 /********************************/
+#define SUPPORT_GET_INTERFACE_IP        // SIOCGIFADDR
 #define SUPPORT_SET_INTERFACE_IP        // SIOCSIFADDR 
-#define SUPPORT_
-#define SUPPORT_
-#define SUPPORT_
+#define SUPPORT_GET_DEST_ADDR           // SIOCGIFDSTADDR
+#define SUPPORT_SET_DEST_ADDR           // SIOCSIFDSTADDR
+
 
 #define ERR_SOCKET          1
 #define ERR_INET_PTON       2
@@ -58,6 +59,8 @@ int get_interface_flags(const char *);
 int set_interface_flags(const char *, short, short);
 
 // Address operations
+int get_interface_ip(const char *);
 int set_interface_ip(const char *, const char *);
-
+int get_dest_addr(const char *);
+int set_dest_addr(const char *, const char *);
 #endif

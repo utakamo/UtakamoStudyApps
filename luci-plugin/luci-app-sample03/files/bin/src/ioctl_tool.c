@@ -351,6 +351,39 @@ int set_interface_flags(const char *ifname, short flags_to_set, short flags_to_c
 }
 #endif
 
+#ifdef SUPPORT_GET_INTERFACE_IP
+/*
+*
+*
+*
+*/
+int get_interface_ip(const char *ifname) {
+    int sockfd;
+    struct ifreq ifr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
+
+    if (ioctl(sockfd, SIOCGIFADDR, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    struct sockaddr_in *ipaddr = (struct sockaddr_in *)&ifr.ifr_addr;
+    printf("IP address of %s: %s\n", ifname, inet_ntoa(ipaddr->sin_addr));
+
+    close(sockfd);
+
+    return 0;
+}
+#endif
+
 #ifdef SUPPORT_SET_INTERFACE_IP
 /*
 * 
@@ -387,6 +420,81 @@ int set_interface_ip(const char *ifname, const char *ip_address) {
 
     close(sockfd);
 
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_GET_DEST_ADDR
+/*
+*
+*
+*
+*/
+int get_dest_addr(const char *ifname) {
+
+    int sockfd;
+    struct ifreq ifr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
+
+    if (ioctl(sockfd, SIOCGIFDSTADDR, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    struct sockaddr_in *dstaddr = (struct sockaddr_in *)&ifr.ifr_dstaddr;
+    printf("Destination address of %s: %s\n", ifname, inet_ntoa(dstaddr->sin_addr));
+
+    close(sockfd);
+
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_SET_DEST_ADDR
+/*
+*
+*
+*
+*/
+int set_dest_addr(const char *ifname, const char *dest_addr) {
+
+    int sockfd;
+    struct ifreq ifr;
+    struct sockaddr_in *addr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
+
+    addr = (struct sockaddr_in *)&ifr.ifr_dstaddr;
+    addr->sin_family = AF_INET;
+
+    if (inet_pton(AF_INET, dest_addr, &addr->sin_addr) != 1) {
+        close(sockfd);
+        return ERR_INET_PTON;
+    }
+
+    if (ioctl(sockfd, SIOCSIFDSTADDR, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("Destination address %s set successfully on interface %s\n", dest_addr, ifname);
+
+    close(sockfd);
     return 0;
 }
 #endif
