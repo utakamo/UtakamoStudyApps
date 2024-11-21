@@ -9,6 +9,9 @@
 * ---> uci get config.section.option
 *
 * uci_param format : <config>.<section>.<option>
+*
+* My Site URL:
+* https://utakamo.com/article/openwrt/library/libuci-c.html#uci-sample03
 */
 bool uci_get_option(char* uci_param, char* value) {
 
@@ -56,6 +59,9 @@ bool uci_get_option(char* uci_param, char* value) {
 *
 * note:
 * Write data to the staging area(/tmp/.uci) and commit to the static area(/etc/config).
+*
+* My Site URL:
+* https://utakamo.com/article/openwrt/library/libuci-c.html#uci_set
 */
 bool uci_set_option(char* uci_param) {
 
