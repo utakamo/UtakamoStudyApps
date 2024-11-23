@@ -445,9 +445,11 @@ int set_interface_ip(const char *ifname, const char *ip_address) {
 
 #ifdef SUPPORT_GET_DEST_ADDR
 /*
+* Get the destination address (IPv4) of an interface
 *
-*
-*
+* usage:
+* char dest_addr[INET_ADDRSTRLEN];
+* get_dest_addr("eth0", dest_addr, sizeof(dest_addr));
 */
 int get_dest_addr(const char *ifname, char *dest_addr, size_t addr_len) {
 
