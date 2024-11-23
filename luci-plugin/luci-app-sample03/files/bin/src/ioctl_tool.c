@@ -524,15 +524,19 @@ int set_dest_addr(const char *ifname, const char *dest_addr) {
 
 #ifdef SUPPORT_GET_BCAST_ADDR
 /*
+* Get the broadcast address (IPv4) of an interface
 * 
-* 
-* 
+* usage:
+* char bcast_addr[INET_ADDRSTRLEN];
+* get_bcast_addr("eth0", bcast_addr, sizeof(bcast_addr));
 */
-int get_bcast_addr(const char *ifname) {
+int get_bcast_addr(const char *ifname, char *bcast_addr, size_t addr_len) {
 
     int sockfd;
     struct ifreq ifr;
     struct sockaddr_in *broadcast_addr;
+
+    memset(bcast_addr, '\0', addr_len);
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
@@ -549,8 +553,7 @@ int get_bcast_addr(const char *ifname) {
     }
 
     broadcast_addr = (struct sockaddr_in *)&ifr.ifr_broadaddr;
-    printf("Broadcast address for interface %s: %s\n",
-           ifname, inet_ntoa(broadcast_addr->sin_addr));
+    snprintf(bcast_addr, addr_len, "%s", inet_ntoa(broadcast_addr->sin_addr));
 
     close(sockfd);
 

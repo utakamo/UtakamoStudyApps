@@ -122,7 +122,7 @@ int get_if_ipv4(const char *, char *, size_t);
 int set_interface_ip(const char *, const char *);
 int get_dest_addr(const char *, char *, size_t);
 int set_dest_addr(const char *, const char *);
-int get_bcast_addr(const char *);
+int get_bcast_addr(const char *, char *, size_t);
 
 // Other interface attribute operations
 int get_mtu(const char *);
