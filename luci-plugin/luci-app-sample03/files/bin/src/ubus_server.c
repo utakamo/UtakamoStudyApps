@@ -42,6 +42,19 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			blobmsg_add_string(blob, "Error", "Invalid MAC Address Format.");
 			return;
 	}
+
+	// handle_rtmsg Error Message
+	if (strcmp(method, "handle_rtmsg") == 0) {
+		switch (result) {
+			case ERR_IOCTL:
+				blobmsg_add_string(blob, "Error", "Failed to retrieve routing infomation (SIOCRTMSG).");
+				return;
+
+			default:
+				blobmsg_add_string(blob, "Error", "Unknown");
+				return;
+		}
+	}
 	
 	// list_if method Error Message
 	if (strcmp(method, "list_if") == 0) {
@@ -55,15 +68,33 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 				return;
 		}
 	}
+
+	// get_if_flags Error Message
+	if (strcmp(method, "get_if_flags") == 0) {
+		switch (result) {
+			case ERR_IOCTL:
+				blobmsg_add_string(blob, "Error", "Failed to retrieve interface flag (SIOCGIFFLAGS).");
+				return;
+
+			default:
+				blobmsg_add_string(blob, "Error", "Unknown");
+				return;
+		}
+	}
 }
 
 /* Ubus method policy */
+static const struct blobmsg_policy handle_rtmsg_method_policy[] = {};
 static const struct blobmsg_policy list_if_method_policy[] = {};
 static const struct blobmsg_policy get_if_flags_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
 };
 
 /* ubus methods */
+static int handle_rtmsg_method(struct ubus_context *, struct ubus_object *,
+			  struct ubus_request_data *, const char *,
+			  struct blob_attr *);
+
 static int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
 			  struct ubus_request_data *req, const char *method,
 			  struct blob_attr *msg);
@@ -107,6 +138,27 @@ int main(int argc, char** argv)
 /*************************/
 /* Ubus method functions */
 /*************************/
+
+int handle_rtmsg_method(struct ubus_context *ctx, struct ubus_object *obj,
+			  struct ubus_request_data *req, const char *method,
+			  struct blob_attr *msg) {
+	
+	char message[1024] = {'\0'};
+	int result = handle_rtmsg(message, sizeof(message));
+
+	blob_buf_init(&blob, 0);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		blobmsg_add_string(&blob, "routing infomation", "hello");
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+
+	return 0;
+}
+
 // usage:
 // root@OpenWrt:~# ubus call luci-app-sample03 list_if '{}'
 int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
@@ -202,6 +254,10 @@ static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj
 const struct ubus_method ubus_sample_methods[] =
 {
 	/* UBUS_METHOD(method_name, method_call_function, method_policy) */
+#ifdef SUPPORT_HANDLE_RTMSG
+	UBUS_METHOD("handle_rtmsg", handle_rtmsg_method, handle_rtmsg_method_policy),
+#endif
+
 #ifdef SUPPORT_LIST_IF
 	UBUS_METHOD("list_if", list_if_method, list_if_method_policy),
 #endif
