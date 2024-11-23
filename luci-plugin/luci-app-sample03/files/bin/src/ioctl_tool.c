@@ -178,7 +178,7 @@ int get_interface_name(int if_index, char *ifname, size_t name_len) {
 }
 #endif
 
-#ifdef SUPPORT_SET_INTERFACE_LINK
+#ifdef SUPPORT_SET_IF_LINK
 /*
 * Change the “link” setting for the interface.
 * This function is used internally to control the behavior associated with a particular network device (e.g., virtual device).
@@ -186,9 +186,9 @@ int get_interface_name(int if_index, char *ifname, size_t name_len) {
 * ex) ip link show eth0
 *
 * usage:
-* set_interface_link("eth0", 1);
+* set_if_link("eth0", 1);
 */
-int set_interface_link(const char *ifname, int link_index) {
+int set_if_link(const char *ifname, int link_index) {
 
     int sockfd;
     struct ifreq ifr;
@@ -215,15 +215,15 @@ int set_interface_link(const char *ifname, int link_index) {
 }
 #endif
 
-#ifdef SUPPORT_LIST_NETWORK_INTERFACES
+#ifdef SUPPORT_LIST_IF
 /*
 * Get a list of network interfaces.
 *
 * usage:
 * char if_list[1024];
-* list_network_interfaces(if_list, sizeof(if_list));
+* list_if(if_list, sizeof(if_list));
 */
-int list_network_interfaces(char* if_list, size_t if_list_len) {
+int list_if(if_list *list, int max_if_num) {
 
     int sockfd;
     struct ifconf ifc;
@@ -246,15 +246,22 @@ int list_network_interfaces(char* if_list, size_t if_list_len) {
     num_interfaces = ifc.ifc_len / sizeof(struct ifreq);
 
     for (i = 0; i < num_interfaces; i++) {
-        char ip_address[INET_ADDRSTRLEN];
+        char ip_addr[INET_ADDRSTRLEN];
         struct sockaddr_in *addr = (struct sockaddr_in *)&ifr[i].ifr_addr;
 
-        printf("Interface: %s\n", ifr[i].ifr_name);
+        if (i >= max_if_num) {
+            break;
+        }
 
-        if (inet_ntop(AF_INET, &addr->sin_addr, ip_address, sizeof(ip_address)) == NULL) {
-            perror("inet_ntop");
+        snprintf(list[i].name, IFNAMSIZ, "%s", ifr[i].ifr_name);
+
+        //printf("Interface: %s\n", ifr[i].ifr_name);
+
+        if (inet_ntop(AF_INET, &addr->sin_addr, ip_addr, sizeof(ip_addr)) == NULL) {
+            snprintf(list[i].ipv4_addr, INET_ADDRSTRLEN, "none");
         } else {
-            printf("  IP Address: %s\n", ip_address);
+            snprintf(list[i].ipv4_addr, INET_ADDRSTRLEN, "%s", ip_addr);
+            //printf("  IP Address: %s\n", ip_addr);
         }
     }
 
@@ -499,6 +506,697 @@ int set_dest_addr(const char *ifname, const char *dest_addr) {
 }
 #endif
 
+#ifdef SUPPORT_GET_BCAST_ADDR
+/*
+* 
+* 
+* 
+*/
+int get_bcast_addr(const char *ifname) {
+
+    int sockfd;
+    struct ifreq ifr;
+    struct sockaddr_in *broadcast_addr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
+
+    if (ioctl(sockfd, SIOCGIFBRDADDR, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    broadcast_addr = (struct sockaddr_in *)&ifr.ifr_broadaddr;
+    printf("Broadcast address for interface %s: %s\n",
+           ifname, inet_ntoa(broadcast_addr->sin_addr));
+
+    close(sockfd);
+
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_SET_BCAST_ADDR
+/*
+*
+*
+*
+*
+*/
+int set_bcast_addr(const char *ifname, const char *bcast_addr) {
+
+    int sockfd;
+    struct ifreq ifr;
+    struct sockaddr_in *addr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
+
+    addr = (struct sockaddr_in *)&ifr.ifr_broadaddr;
+    addr->sin_family = AF_INET;
+
+    if (inet_pton(AF_INET, bcast_addr, &addr->sin_addr) != 1) {
+        close(sockfd);
+        return ERR_INET_PTON;
+    }
+
+    if (ioctl(sockfd, SIOCSIFBRDADDR, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("Broadcast address %s set successfully on interface %s\n", bcast_addr, ifname);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_GET_NETMASK
+/*
+*
+*
+*
+*
+*/
+int get_netmask(const char *ifname) {
+
+    int sockfd;
+    struct ifreq ifr;
+    struct sockaddr_in *netmask_addr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
+
+    if (ioctl(sockfd, SIOCGIFNETMASK, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    netmask_addr = (struct sockaddr_in *)&ifr.ifr_netmask;
+    printf("Netmask for interface %s: %s\n",
+           ifname, inet_ntoa(netmask_addr->sin_addr));
+
+    close(sockfd);
+
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_SET_NETMASK
+/*
+*
+*
+*
+*
+*/
+int set_netmask(const char *ifname, const char *netmask) {
+
+    int sockfd;
+    struct ifreq ifr;
+    struct sockaddr_in *addr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
+
+    addr = (struct sockaddr_in *)&ifr.ifr_netmask;
+    addr->sin_family = AF_INET;
+
+    if (inet_pton(AF_INET, netmask, &addr->sin_addr) != 1) {
+        close(sockfd);
+        return ERR_INET_PTON;
+    }
+
+    if (ioctl(sockfd, SIOCSIFNETMASK, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("Netmask %s set successfully on interface %s\n", netmask, ifname);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_GET_MTU
+/*
+*
+*
+*
+*/
+int get_mtu(const char *ifname) {
+
+    int sockfd;
+    struct ifreq ifr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
+
+    if (ioctl(sockfd, SIOCGIFMTU, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("MTU for interface %s: %d\n", ifname, ifr.ifr_mtu);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_SET_MTU
+/*
+*
+*
+*
+*
+*/
+int set_mtu(const char *ifname, int mtu) {
+
+    int sockfd;
+    struct ifreq ifr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
+
+    ifr.ifr_mtu = mtu;
+
+    if (ioctl(sockfd, SIOCSIFMTU, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("MTU set to %d for interface %s\n", mtu, ifname);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_GET_MAC_ADDR
+/*
+*
+*
+*
+*
+*/
+int get_mac_addr(const char *ifname) {
+
+    int sockfd;
+    struct ifreq ifr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
+
+    if (ioctl(sockfd, SIOCGIFHWADDR, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    unsigned char *mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
+
+    printf("MAC address for interface %s: %02x:%02x:%02x:%02x:%02x:%02x\n",
+           ifname, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_SET_MAC_ADDR
+/*
+*
+*
+*
+*/
+int set_mac_addr(const char *ifname, const char *new_mac_addr) {
+
+    int sockfd;
+    struct ifreq ifr;
+    unsigned char mac[6];
+
+    if (sscanf(new_mac_addr, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+               &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) != 6) {
+        fprintf(stderr, "Invalid MAC address format: %s\n", new_mac_addr);
+        return ERR_MAC_FORMAT;
+    }
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
+
+    memcpy(ifr.ifr_hwaddr.sa_data, mac, 6);
+    ifr.ifr_hwaddr.sa_family = ARPHRD_ETHER;
+
+    if (ioctl(sockfd, SIOCSIFHWADDR, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("MAC address set to %s for interface %s\n", new_mac_addr, ifname);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_DELETE_ARP_ENTRY
+/*
+*
+*
+*
+*
+*/
+int delete_arp_entry(const char *ip_addr) {
+
+    int sockfd;
+    struct arpreq req;
+    struct sockaddr_in *sin;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&req, 0, sizeof(req));
+
+    sin = (struct sockaddr_in *)&req.arp_pa;
+    sin->sin_family = AF_INET;
+    if (inet_pton(AF_INET, ip_addr, &sin->sin_addr) != 1) {
+        close(sockfd);
+        return ERR_INET_PTON;
+    }
+
+    if (ioctl(sockfd, SIOCDARP, &req) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("ARP entry for %s has been deleted successfully.\n", ip_addr);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_GET_ARP_ENTRY
+/*
+*
+*
+*
+*/
+int get_arp_entry(const char *ip_addr) {
+
+    int sockfd;
+    struct arpreq req;
+    struct sockaddr_in *sin;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&req, 0, sizeof(req));
+
+    sin = (struct sockaddr_in *)&req.arp_pa;
+    sin->sin_family = AF_INET;
+    if (inet_pton(AF_INET, ip_addr, &sin->sin_addr) != 1) {
+        close(sockfd);
+        return ERR_INET_PTON;
+    }
+
+    if (ioctl(sockfd, SIOCGARP, &req) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    unsigned char *mac = (unsigned char *)req.arp_ha.sa_data;
+    printf("IP Address: %s\n", ip_addr);
+    printf("MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+    printf("Flags: 0x%x\n", req.arp_flags);
+    if (req.arp_flags & ATF_COM) {
+        printf("  - Entry is complete\n");
+    }
+    if (req.arp_flags & ATF_PERM) {
+        printf("  - Entry is permanent\n");
+    }
+    if (req.arp_flags & ATF_PUBL) {
+        printf("  - Entry is published\n");
+    }
+    if (req.arp_flags & ATF_USETRAILERS) {
+        printf("  - Use trailers\n");
+    }
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_SET_ARP_ENTRY
+/*
+*
+*
+*
+*
+*/
+int set_arp_entry(const char *ip_addr, const char *mac_addr, const char *interface) {
+
+    int sockfd;
+    struct arpreq req;
+    struct sockaddr_in *sin;
+    unsigned char mac[ETH_ALEN];
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&req, 0, sizeof(req));
+
+    sin = (struct sockaddr_in *)&req.arp_pa;
+    sin->sin_family = AF_INET;
+    if (inet_pton(AF_INET, ip_addr, &sin->sin_addr) != 1) {
+        close(sockfd);
+        return ERR_INET_PTON;
+    }
+
+    if (sscanf(mac_addr, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+               &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) != 6) {
+        close(sockfd);
+        return ERR_MAC_FORMAT;
+    }
+    memcpy(req.arp_ha.sa_data, mac, ETH_ALEN);
+    req.arp_ha.sa_family = ARPHRD_ETHER;
+
+    strncpy(req.arp_dev, interface, sizeof(req.arp_dev) - 1);
+
+    req.arp_flags = ATF_COM | ATF_PERM;
+
+    if (ioctl(sockfd, SIOCSARP, &req) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("Successfully added ARP entry for IP: %s\n", ip_addr);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_DELETE_RARP_ENTRY
+/*
+*
+*
+*
+*
+*/
+int delete_rarp_entry(const char *ip_addr) {
+
+    int sockfd;
+    struct arpreq req;
+    struct sockaddr_in *sin;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&req, 0, sizeof(req));
+
+    sin = (struct sockaddr_in *)&req.arp_pa;
+    sin->sin_family = AF_INET;
+    if (inet_pton(AF_INET, ip_addr, &sin->sin_addr) != 1) {
+        close(sockfd);
+        return ERR_INET_PTON;
+    }
+
+    if (ioctl(sockfd, SIOCDRARP, &req) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("Successfully deleted RARP entry for IP: %s\n", ip_addr);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_GET_RARP_ENTRY
+/*
+*
+*
+*
+*
+*/
+int get_rarp_entry(const char *ip_addr) {
+
+    int sockfd;
+    struct arpreq req;
+    struct sockaddr_in *sin;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&req, 0, sizeof(req));
+
+    sin = (struct sockaddr_in *)&req.arp_pa;
+    sin->sin_family = AF_INET;
+    if (inet_pton(AF_INET, ip_addr, &sin->sin_addr) != 1) {
+        close(sockfd);
+        return ERR_SOCKET;
+    }
+
+    if (ioctl(sockfd, SIOCGRARP, &req) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("RARP entry for IP: %s\n", ip_addr);
+    printf("Hardware address: ");
+    for (int i = 0; i < 6; i++) {
+        printf("%02x", (unsigned char)req.arp_ha.sa_data[i]);
+        if (i < 5) printf(":");
+    }
+    printf("\n");
+
+    printf("Flags: 0x%x\n", req.arp_flags);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_SET_RARP_ENTRY
+/*
+*
+*
+*
+*
+*/
+int set_rarp_entry(const char *ip_addr, const char *mac_addr) {
+
+    int sockfd;
+    struct arpreq req;
+    struct sockaddr_in *sin;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    memset(&req, 0, sizeof(req));
+
+    sin = (struct sockaddr_in *)&req.arp_pa;
+    sin->sin_family = AF_INET;
+    if (inet_pton(AF_INET, ip_addr, &sin->sin_addr) != 1) {
+        close(sockfd);
+        return ERR_INET_PTON;
+    }
+
+    struct sockaddr *ha = &req.arp_ha;
+    ha->sa_family = ARPHRD_ETHER;
+    unsigned int mac[6];
+    if (sscanf(mac_addr, "%02x:%02x:%02x:%02x:%02x:%02x",
+               &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) != 6) {
+        close(sockfd);
+        return ERR_MAC_FORMAT;
+    }
+    for (int i = 0; i < 6; i++) {
+        ha->sa_data[i] = (unsigned char)mac[i];
+    }
+
+    req.arp_flags = ATF_COM;
+
+    if (ioctl(sockfd, SIOCSRARP, &req) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("Successfully set RARP entry for IP: %s with MAC: %s\n", ip_addr, mac_addr);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_GET_IF_MAP
+/*
+*
+*
+*
+*
+*/
+int get_if_map(const char *ifname) {
+
+    int sockfd;
+    struct ifreq ifr;
+    struct ifmap *map;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+
+    if (ioctl(sockfd, SIOCGIFMAP, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    map = &ifr.ifr_map;
+    printf("Interface: %s\n", ifname);
+    printf("  mem_start: 0x%lx\n", map->mem_start);
+    printf("  mem_end:   0x%lx\n", map->mem_end);
+    printf("  base_addr: 0x%x\n", map->base_addr);
+    printf("  irq:       %d\n", map->irq);
+    printf("  dma:       %d\n", map->dma);
+    printf("  port:      %d\n", map->port);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_SET_IF_MAP
+/*
+*
+*
+*
+*/
+int set_if_map(const char *ifname, struct ifmap *new_map) {
+
+    int sockfd;
+    struct ifreq ifr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+
+    memcpy(&ifr.ifr_map, new_map, sizeof(struct ifmap));
+
+    if (ioctl(sockfd, SIOCSIFMAP, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("Hardware parameters updated for interface: %s\n", ifname);
+
+    close(sockfd);
+    return 0;
+}
+#endif
+
+#ifdef SUPPORT_GET_TX_QUE_LEN
+/*
+*
+*
+*
+*/
+int get_tx_que_len(const char *ifname) {
+
+    int sockfd;
+    struct ifreq ifr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        return ERR_SOCKET;
+    }
+
+    strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+
+    if (ioctl(sockfd, SIOCGIFTXQLEN, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
+    printf("Interface: %s\n", ifname);
+    printf("Transmit Queue Length: %d\n", ifr.ifr_qlen);
+
+    close(sockfd);
+
+    return 0;
+}
+#endif
+
+/*
 int main() {
 
     //add_route("192.168.1.0", "192.168.1.1", "255.255.255.0", "eth0");
@@ -512,11 +1210,12 @@ int main() {
     //get_interface_name(1, ifname, sizeof(ifname));
     //printf("%s\n", ifname);
 
-    //set_interface_link("eth0", 1);
+    //set_if_link("eth0", 1);
 
     //char if_list[1024];
-    //list_network_interfaces(if_list, sizeof(if_list));
+    //list_if(if_list, sizeof(if_list));
 
     //get_interface_flags("eth0");
-    set_interface_flags("eth", 0x01, 0x0);
+    //set_interface_flags("eth", 0x01, 0x0);
 }
+*/
