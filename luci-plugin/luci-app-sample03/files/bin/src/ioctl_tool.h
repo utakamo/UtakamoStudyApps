@@ -28,7 +28,7 @@
 #define SUPPORT_GET_INTERFACE_NAME      // SIOCGIFNAME
 #define SUPPORT_SET_IF_LINK             // SIOCSIFLINK
 #define SUPPORT_LIST_IF                 // SIOCGIFCONF
-#define SUPPORT_GET_INTERFACE_FLAGS     // SIOCGIFFLAGS
+#define SUPPORT_GET_IF_FLAGS            // SIOCGIFFLAGS
 #define SUPPORT_SET_INTERFACE_FLAGS     // SIOCSIFFLAGS
 
 /********************************/
@@ -41,7 +41,6 @@
 #define SUPPORT_GET_BCAST_ADDR          // SIOCGIFBRDADDR
 #define SUPPORT_GET_NETMASK             // SIOCGIFNETMASK
 #define SUPPORT_SET_NETMASK             // SIOCSIFNETMASK
-
 
 /****************************************************/
 /*      Other interface attribute operations        */
@@ -89,6 +88,23 @@ typedef struct if_list {
     char ipv6_addr[INET6_ADDRSTRLEN];
 } if_list;
 
+#define MAX_FLAG_NUM        7
+#define MAX_FLAG_STRING     32
+#define MAX_FLAG_MESSAGE    256
+
+typedef struct flag_info {
+    char flag[MAX_FLAG_STRING];
+    char message[MAX_FLAG_NUM][MAX_FLAG_MESSAGE];
+    // --- FLAG LIST [total:7 (MAX_FLAG_NUM)] ---
+    // IFF_UP
+    // IFF_BROADCAST
+    // IFF_LOOPBACK
+    // IFF_POINTOPOINT
+    // IFF_RUNNING
+    // IFF_NOARP
+    // IFF_PROMISC
+} flag_info;
+
 // Routing operations 
 int add_route(const char *, const char *, const char *, const char *);
 int delete_route(const char *, const char *, const char *);
@@ -98,7 +114,7 @@ int handle_rtmsg(char *, size_t);
 int get_interface_name(int, char *, size_t);
 int set_if_link(const char *, int);
 int list_if(if_list *, int);
-int get_interface_flags(const char *);
+int get_if_flags(const char *, flag_info *);
 int set_interface_flags(const char *, short, short);
 
 // Address operations

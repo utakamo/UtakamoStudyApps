@@ -16,9 +16,12 @@
 #include "ioctl_tool.h"
 
 enum {
-	UCI_SET_INFO_OPTION,
-	UCI_SET_INFO_VALUE,
-	UCI_SET_INFO_MAX,
+	UBUS_METHOD_ARGUMENT_1,
+	UBUS_METHOD_ARGUMENT_2,
+	UBUS_METHOD_ARGUMENT_3,
+	UBUS_METHOD_ARGUMENT_4,
+	UBUS_METHOD_ARGUMENT_5,
+	UBUS_METHOD_ARGUMENT_MAX,
 };
 
 static struct blob_buf blob;
@@ -56,11 +59,18 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 
 /* Ubus method policy */
 static const struct blobmsg_policy list_if_method_policy[] = {};
+static const struct blobmsg_policy get_if_flags_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
+};
 
 /* ubus methods */
 static int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
 			  struct ubus_request_data *req, const char *method,
 			  struct blob_attr *msg);
+
+static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg);
 
 void ubus_process(void);
 
@@ -135,12 +145,64 @@ int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
 	return 0;
 }
 
+static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+    struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+
+    blobmsg_parse(get_if_flags_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+    if (!tb[UBUS_METHOD_ARGUMENT_1]){
+        blob_buf_init(&blob, 0);
+        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        ubus_send_reply(ctx, req, blob.head);
+
+        return -1;
+    }
+
+	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+	flag_info info;
+
+	int result = get_if_flags(ifname, &info);
+
+	blob_buf_init(&blob, 0);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+
+		int i;
+		void *s = blobmsg_open_table(&blob, "info");
+		char msg_key_name[256];
+
+		blobmsg_add_string(&blob, "flag", info.flag);
+
+		for (i = 0; i < 7; i++) {
+			if (strlen(info.message[i]) > 0) {
+				snprintf(msg_key_name, sizeof(msg_key_name), "%s%d", "message_", (i + 1));
+				blobmsg_add_string(&blob, msg_key_name, info.message[i]);
+			}
+		}
+
+		blobmsg_close_table(&blob, s);
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+
+	return 0;
+}
+
 /* Ubus object methods */
 const struct ubus_method ubus_sample_methods[] =
 {
 	/* UBUS_METHOD(method_name, method_call_function, method_policy) */
 #ifdef SUPPORT_LIST_IF
 	UBUS_METHOD("list_if", list_if_method, list_if_method_policy),
+#endif
+
+#ifdef SUPPORT_GET_IF_FLAGS
+	UBUS_METHOD("get_if_flags", get_if_flags_method, get_if_flags_method_policy),
 #endif
 
 };

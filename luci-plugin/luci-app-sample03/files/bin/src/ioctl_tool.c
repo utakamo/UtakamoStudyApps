@@ -271,14 +271,14 @@ int list_if(if_list *list, int max_if_num) {
 }
 #endif
 
-#ifdef SUPPORT_GET_INTERFACE_FLAGS
+#ifdef SUPPORT_GET_IF_FLAGS
 /*
 * Get network interface flags.
 *
 * usage:
 * 
 */
-int get_interface_flags(const char *ifname) {
+int get_if_flags(const char *ifname, flag_info *info) {
 
     int sockfd;
     struct ifreq ifr;
@@ -299,15 +299,21 @@ int get_interface_flags(const char *ifname) {
 
     short flags = ifr.ifr_flags;
 
-    printf("Flags for interface %s: 0x%x\n", ifname, flags);
+    snprintf(info->flag, MAX_FLAG_STRING, "0x%x", flags);
 
-    if (flags & IFF_UP) printf("  Interface is up\n");
-    if (flags & IFF_BROADCAST) printf("  Supports broadcast\n");
-    if (flags & IFF_LOOPBACK) printf("  Loopback interface\n");
-    if (flags & IFF_POINTOPOINT) printf("  Point-to-point link\n");
-    if (flags & IFF_RUNNING) printf("  Interface is running\n");
-    if (flags & IFF_NOARP) printf("  No ARP protocol\n");
-    if (flags & IFF_PROMISC) printf("  Promiscuous mode\n");
+    int i;
+    for (i = 0; i < MAX_FLAG_NUM; i++) {
+        memset(info->message[i], '\0', MAX_FLAG_MESSAGE);
+    }
+
+    int item = 0;
+    if (flags & IFF_UP) snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Interface is up (IFF_UP)");
+    if (flags & IFF_BROADCAST) snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Supports broadcast (IFF_BROADCAST)");
+    if (flags & IFF_LOOPBACK) snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Loopback interface (IFF_LOOPBACK)");
+    if (flags & IFF_POINTOPOINT) snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Point-to-point link (IFF_POINTOPOINT)");
+    if (flags & IFF_RUNNING) snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Interface is running (IFF_RUNNING)");
+    if (flags & IFF_NOARP) snprintf(info->message[item++], MAX_FLAG_MESSAGE, "No ARP protocol (IFF_NOARP)");
+    if (flags & IFF_PROMISC) snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Promiscuous mode (IFF_PROMISC)");
 
     close(sockfd);
 
@@ -1215,7 +1221,7 @@ int main() {
     //char if_list[1024];
     //list_if(if_list, sizeof(if_list));
 
-    //get_interface_flags("eth0");
+    //get_if_flags("eth0");
     //set_interface_flags("eth", 0x01, 0x0);
 }
 */
