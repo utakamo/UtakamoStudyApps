@@ -276,7 +276,8 @@ int list_if(if_list *list, int max_if_num) {
 * Get network interface flags.
 *
 * usage:
-* 
+* flag_info info;
+* get_if_flags("eth0", &info);
 */
 int get_if_flags(const char *ifname, flag_info *info) {
 
