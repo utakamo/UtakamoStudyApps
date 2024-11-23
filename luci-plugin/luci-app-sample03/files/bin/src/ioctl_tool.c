@@ -395,7 +395,7 @@ int get_if_ipv4(const char *ifname, char *ipv4_addr, size_t addr_len) {
     }
 
     struct sockaddr_in *ipaddr = (struct sockaddr_in *)&ifr.ifr_addr;
-    snprintf(ipv4_addr, INET_ADDRSTRLEN, "%s", inet_ntoa(ipaddr->sin_addr));
+    snprintf(ipv4_addr, addr_len, "%s", inet_ntoa(ipaddr->sin_addr));
 
     close(sockfd);
 
@@ -449,10 +449,12 @@ int set_interface_ip(const char *ifname, const char *ip_address) {
 *
 *
 */
-int get_dest_addr(const char *ifname) {
+int get_dest_addr(const char *ifname, char *dest_addr, size_t addr_len) {
 
     int sockfd;
     struct ifreq ifr;
+
+    memset(dest_addr, '\0', addr_len);
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
@@ -469,7 +471,7 @@ int get_dest_addr(const char *ifname) {
     }
 
     struct sockaddr_in *dstaddr = (struct sockaddr_in *)&ifr.ifr_dstaddr;
-    printf("Destination address of %s: %s\n", ifname, inet_ntoa(dstaddr->sin_addr));
+    snprintf(dest_addr, addr_len, "%s", inet_ntoa(dstaddr->sin_addr));
 
     close(sockfd);
 

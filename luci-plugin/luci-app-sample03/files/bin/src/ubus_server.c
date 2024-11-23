@@ -94,6 +94,19 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 				return;
 		}
 	}
+
+	// get_dest_addr Error Message
+	if (strcmp(method, "get_dest_addr") == 0) {
+		switch (result) {
+			case ERR_IOCTL:
+				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCGIFDSTADDR).");
+				return;
+
+			default:
+				blobmsg_add_string(blob, "Error", "Unknown");
+				return;
+		}
+	}
 }
 
 /* Ubus method policy */
@@ -103,6 +116,9 @@ static const struct blobmsg_policy get_if_flags_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
 };
 static const struct blobmsg_policy get_if_ipv4_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
+};
+static const struct blobmsg_policy get_dest_addr_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
 };
 
@@ -120,6 +136,10 @@ static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj
                         struct blob_attr *msg);
 
 static int get_if_ipv4_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg);
+
+static int get_dest_addr_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg);
 
@@ -309,6 +329,43 @@ static int get_if_ipv4_method(struct ubus_context *ctx, struct ubus_object *obj,
 	return 0;
 }
 
+static int get_dest_addr_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+	
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+    blobmsg_parse(get_dest_addr_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+    if (!tb[UBUS_METHOD_ARGUMENT_1]){
+        blob_buf_init(&blob, 0);
+        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        ubus_send_reply(ctx, req, blob.head);
+        return -1;
+    }
+
+	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+
+	blob_buf_init(&blob, 0);
+
+	if (strlen(ifname) > IFNAMSIZ) {
+		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		return -1;
+	}
+
+	char dest_ipv4_addr[INET_ADDRSTRLEN];
+
+	int result = get_dest_addr(ifname, dest_ipv4_addr, sizeof(dest_ipv4_addr));
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		blobmsg_add_string(&blob, "Destination ipv4 address", dest_ipv4_addr);
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+	return 0;
+}
+
 /* Ubus object methods */
 const struct ubus_method ubus_sample_methods[] =
 {
@@ -327,6 +384,10 @@ const struct ubus_method ubus_sample_methods[] =
 
 #ifdef SUPPORT_GET_IF_IPV4
 	UBUS_METHOD("get_if_ipv4", get_if_ipv4_method, get_if_ipv4_method_policy),
+#endif
+
+#ifdef SUPPORT_GET_DEST_ADDR
+	UBUS_METHOD("get_dest_addr", get_dest_addr_method, get_dest_addr_method_policy),
 #endif
 };
 
