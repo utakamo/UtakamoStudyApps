@@ -114,7 +114,7 @@ int delete_route(const char *destination, const char *netmask, const char *inter
 * It is also ambiguous in use and meaning, and may involve kernel- or specific driver-dependent behavior.
 *
 * usage:
-* char message[1024];
+* char message[256];
 * handle_rtmsg(message, sizeof(message))
 */
 int handle_rtmsg(char *msg, size_t msg_len) {
