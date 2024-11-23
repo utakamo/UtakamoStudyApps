@@ -371,12 +371,14 @@ int set_interface_flags(const char *ifname, short flags_to_set, short flags_to_c
 *
 * usage:
 * char ipv4_addr[INET_ADDRSTRLEN];
-* get_if_ipv4("eth0", ipv4_addr);
+* get_if_ipv4("eth0", ipv4_addr, sizeof(ipv4_addr));
 */
-int get_if_ipv4(const char *ifname, char *ipv4_addr) {
+int get_if_ipv4(const char *ifname, char *ipv4_addr, size_t addr_len) {
 
     int sockfd;
     struct ifreq ifr;
+
+    memset(ipv4_addr, '\0', addr_len);
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {

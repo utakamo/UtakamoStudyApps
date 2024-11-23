@@ -118,7 +118,7 @@ int get_if_flags(const char *, flag_info *);
 int set_interface_flags(const char *, short, short);
 
 // Address operations
-int get_if_ipv4(const char *, char *);
+int get_if_ipv4(const char *, char *, size_t); 
 int set_interface_ip(const char *, const char *);
 int get_dest_addr(const char *);
 int set_dest_addr(const char *, const char *);

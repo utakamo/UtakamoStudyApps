@@ -295,9 +295,9 @@ static int get_if_ipv4_method(struct ubus_context *ctx, struct ubus_object *obj,
 		return -1;
 	}
 
-	char ipv4_addr[INET_ADDRSTRLEN] = {'\0'};
+	char ipv4_addr[INET_ADDRSTRLEN];
 
-	int result = get_if_ipv4(ifname, ipv4_addr);
+	int result = get_if_ipv4(ifname, ipv4_addr, sizeof(ipv4_addr));
 
 	if (result != 0) {
 		blobmsg_error(&blob, result, method);
