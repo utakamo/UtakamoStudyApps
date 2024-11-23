@@ -367,9 +367,11 @@ int set_interface_flags(const char *ifname, short flags_to_set, short flags_to_c
 
 #ifdef SUPPORT_GET_IF_IPV4
 /*
+* Get the IPv4 address of an interface.
 *
-*
-*
+* usage:
+* char ipv4_addr[INET_ADDRSTRLEN];
+* get_if_ipv4("eth0", ipv4_addr);
 */
 int get_if_ipv4(const char *ifname, char *ipv4_addr) {
 
