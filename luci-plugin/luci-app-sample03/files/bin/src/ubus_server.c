@@ -104,8 +104,11 @@ int main(int argc, char** argv)
 	return EXIT_SUCCESS;
 }
 
-// Ubus method functions
-//output the uci configuration file.
+/*************************/
+/* Ubus method functions */
+/*************************/
+// usage:
+// root@OpenWrt:~# ubus call luci-app-sample03 list_if '{}'
 int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
 				struct ubus_request_data *req, const char *method,
 				struct blob_attr *msg) {
@@ -145,6 +148,8 @@ int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
 	return 0;
 }
 
+// usage:
+// root@OpenWrt:~# ubus call luci-app-sample03 get_if_flags '{"ifname":"eth0"}'
 static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
