@@ -113,18 +113,23 @@ int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
 		blobmsg_error(&blob, result, method);
 	} else {
 
+		int i;
+
+		for (i = 0; i < max_if_num; i++) {
+
+			if (strlen(list[i].name) == 0) {
+				break;
+			}
+
+			char if_item_name[32] = {'\0'};
+			snprintf(if_item_name, sizeof(if_item_name), "%s%d", "if_item_", (i + 1));
+			s = blobmsg_open_table(&blob, if_item_name);
+			blobmsg_add_string(&blob, "interface", list[i].name);
+			blobmsg_add_string(&blob, "ipv4 address", list[i].ipv4_addr);
+			blobmsg_close_table(&blob, s);
+		}
 	}
 
-	blobmsg_add_string(&blob, "Description", "[ubus json format]");
-	blobmsg_add_string(&blob, "string", "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-	blobmsg_add_u8(&blob, "bool", true);
-	blobmsg_add_u32(&blob, "numeric data", 100);
-	s = blobmsg_open_table(&blob, "table");
-	blobmsg_add_string(&blob, "table-element1", "string data");
-	blobmsg_add_u8(&blob, "table-element2", true);
-	blobmsg_add_u32(&blob, "table-element3", 200);
-	blobmsg_close_table(&blob, s);
-	blobmsg_add_string(&blob, "Note", "Please read this source code for detailed usage.");
 	ubus_send_reply(ctx, req, blob.head);
 
 	return 0;
