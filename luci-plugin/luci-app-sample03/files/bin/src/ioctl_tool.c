@@ -365,13 +365,14 @@ int set_interface_flags(const char *ifname, short flags_to_set, short flags_to_c
 }
 #endif
 
-#ifdef SUPPORT_GET_INTERFACE_IP
+#ifdef SUPPORT_GET_IF_IPV4
 /*
 *
 *
 *
 */
-int get_interface_ip(const char *ifname) {
+int get_if_ipv4(const char *ifname, char *ipv4_addr) {
+
     int sockfd;
     struct ifreq ifr;
 
@@ -390,7 +391,7 @@ int get_interface_ip(const char *ifname) {
     }
 
     struct sockaddr_in *ipaddr = (struct sockaddr_in *)&ifr.ifr_addr;
-    printf("IP address of %s: %s\n", ifname, inet_ntoa(ipaddr->sin_addr));
+    snprintf(ipv4_addr, INET_ADDRSTRLEN, "%s", inet_ntoa(ipaddr->sin_addr));
 
     close(sockfd);
 

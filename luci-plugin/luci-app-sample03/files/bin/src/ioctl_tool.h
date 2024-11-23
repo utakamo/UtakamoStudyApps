@@ -34,7 +34,7 @@
 /********************************/
 /*      Address operations      */
 /********************************/
-#define SUPPORT_GET_INTERFACE_IP        // SIOCGIFADDR
+#define SUPPORT_GET_IF_IPV4        // SIOCGIFADDR
 #define SUPPORT_SET_INTERFACE_IP        // SIOCSIFADDR 
 #define SUPPORT_GET_DEST_ADDR           // SIOCGIFDSTADDR
 #define SUPPORT_SET_DEST_ADDR           // SIOCSIFDSTADDR
@@ -118,7 +118,7 @@ int get_if_flags(const char *, flag_info *);
 int set_interface_flags(const char *, short, short);
 
 // Address operations
-int get_interface_ip(const char *);
+int get_if_ipv4(const char *, char *);
 int set_interface_ip(const char *, const char *);
 int get_dest_addr(const char *);
 int set_dest_addr(const char *, const char *);
