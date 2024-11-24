@@ -201,6 +201,13 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 }
 
 /* Ubus method policy */
+static const struct blobmsg_policy add_route_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="destination", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_2] = { .name="gateway", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_3] = { .name="netmask", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_4] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
+};
+
 static const struct blobmsg_policy handle_rtmsg_method_policy[] = {};
 static const struct blobmsg_policy list_if_method_policy[] = {};
 
@@ -245,6 +252,10 @@ static const struct blobmsg_policy get_tx_que_len_method_policy[] = {
 };
 
 /* ubus methods */
+static int add_route_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
+
 static int handle_rtmsg_method(struct ubus_context *, struct ubus_object *,
 			  struct ubus_request_data *, const char *,
 			  struct blob_attr *);
@@ -324,6 +335,38 @@ int main(int argc, char** argv)
 /*************************/
 /* Ubus method functions */
 /*************************/
+int add_route_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+    blobmsg_parse(add_route_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+    if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]
+		|| !tb[UBUS_METHOD_ARGUMENT_3] || !tb[UBUS_METHOD_ARGUMENT_4]){
+        blob_buf_init(&blob, 0);
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
+        ubus_send_reply(ctx, req, blob.head);
+
+        return -1;
+    }
+
+	const char *dest = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+	const char *gateway = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_2]);
+	const char *netmask = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_3]);
+	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_4]);
+
+	int result = add_route(dest, gateway, netmask, ifname);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		blobmsg_add_string(&blob, "Success", "Add new routing table");
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+	return 0;
+}
 
 int handle_rtmsg_method(struct ubus_context *ctx, struct ubus_object *obj,
 			  struct ubus_request_data *req, const char *method,
@@ -382,7 +425,6 @@ int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
 	}
 
 	ubus_send_reply(ctx, req, blob.head);
-
 	return 0;
 }
 
@@ -523,14 +565,14 @@ static int get_bcast_addr_method(struct ubus_context *ctx, struct ubus_object *o
                         struct blob_attr *msg) {
 	
 	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
-    blobmsg_parse(get_bcast_addr_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+	blobmsg_parse(get_bcast_addr_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
-    if (!tb[UBUS_METHOD_ARGUMENT_1]){
-        blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "Mismatch Key");
-        ubus_send_reply(ctx, req, blob.head);
-        return -1;
-    }
+	if (!tb[UBUS_METHOD_ARGUMENT_1]){
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
 
 	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
 
@@ -822,6 +864,10 @@ static int get_tx_que_len_method(struct ubus_context *ctx, struct ubus_object *o
 const struct ubus_method ubus_sample_methods[] =
 {
 	/* UBUS_METHOD(method_name, method_call_function, method_policy) */
+#ifdef SUPPORT_ADD_ROUTE
+	UBUS_METHOD("add_route", add_route_method, add_route_method_policy),
+#endif
+
 #ifdef SUPPORT_HANDLE_RTMSG
 	UBUS_METHOD("handle_rtmsg", handle_rtmsg_method, handle_rtmsg_method_policy),
 #endif

@@ -10,7 +10,7 @@
 * usage: add_route("192.168.1.0", "192.168.1.1", "255.255.255.0", "eth0");
 * ---> ip route add 192.168.1.0/24 via 192.168.1.1 dev eth0
 */
-int add_route(const char *destination, const char *gateway, const char *netmask, const char *interface) {
+int add_route(const char *dest, const char *gateway, const char *netmask, const char *ifname) {
 
     int sockfd;
     struct rtentry route;
@@ -25,7 +25,7 @@ int add_route(const char *destination, const char *gateway, const char *netmask,
 
     addr = (struct sockaddr_in *)&route.rt_dst;
     addr->sin_family = AF_INET;
-    if (inet_pton(AF_INET, destination, &addr->sin_addr) <= 0) {
+    if (inet_pton(AF_INET, dest, &addr->sin_addr) <= 0) {
         close(sockfd);
         return ERR_INET_PTON_DST;
     }
@@ -45,7 +45,7 @@ int add_route(const char *destination, const char *gateway, const char *netmask,
     }
 
     route.rt_flags = RTF_UP | RTF_GATEWAY;
-    route.rt_dev = (char *)interface;
+    route.rt_dev = (char *)ifname;
 
     if (ioctl(sockfd, SIOCADDRT, &route) < 0) {
         close(sockfd);
