@@ -1024,12 +1024,12 @@ int delete_rarp_entry(const char *ip_addr) {
 
 #ifdef SUPPORT_GET_RARP_ENTRY
 /*
-*
+* 
 *
 *
 *
 */
-int get_rarp_entry(const char *ip_addr) {
+int get_rarp_entry(const char *neigh_mac_addr, rarp_entry_info *info) {
 
     int sockfd;
     struct arpreq req;
@@ -1042,27 +1042,33 @@ int get_rarp_entry(const char *ip_addr) {
 
     memset(&req, 0, sizeof(req));
 
-    sin = (struct sockaddr_in *)&req.arp_pa;
-    sin->sin_family = AF_INET;
-    if (inet_pton(AF_INET, ip_addr, &sin->sin_addr) != 1) {
-        close(sockfd);
-        return ERR_SOCKET;
-    }
+    memcpy(req.arp_ha.sa_data, neigh_mac_addr, 6);
+    req.arp_ha.sa_family = ARPHRD_ETHER;
 
     if (ioctl(sockfd, SIOCGRARP, &req) < 0) {
         close(sockfd);
         return ERR_IOCTL;
     }
 
-    printf("RARP entry for IP: %s\n", ip_addr);
-    printf("Hardware address: ");
-    for (int i = 0; i < 6; i++) {
-        printf("%02x", (unsigned char)req.arp_ha.sa_data[i]);
-        if (i < 5) printf(":");
-    }
-    printf("\n");
+    sin = (struct sockaddr_in *)&req.arp_pa;
+    inet_ntop(AF_INET, &sin->sin_addr, info->ip_addr, INET_ADDRSTRLEN);
 
-    printf("Flags: 0x%x\n", req.arp_flags);
+    snprintf(info->flag, MAX_FLAG_STRING, "0x%x\n", req.arp_flags);
+
+    int item = 0;
+
+    if (req.arp_flags & ATF_COM) {
+        snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Entry is complete (ATF_COM)");
+    }
+    if (req.arp_flags & ATF_PERM) {
+        snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Entry is permanent (ATF_PERM)");
+    }
+    if (req.arp_flags & ATF_PUBL) {
+        snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Entry is published (ATF_PUBL)");
+    }
+    if (req.arp_flags & ATF_USETRAILERS) {
+        snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Use trailers (ATF_USETRAILERS)");
+    }
 
     close(sockfd);
     return 0;

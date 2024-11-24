@@ -116,6 +116,17 @@ typedef struct arp_entry_info {
     // ATF_USETRAILERS
 } arp_entry_info;
 
+typedef struct rarp_entry_info {
+    char ip_addr[INET_ADDRSTRLEN];
+    char flag[MAX_FLAG_STRING];
+    char message[MAX_FLAG_NUM][MAX_FLAG_MESSAGE];
+    // -- FLAG LIST [total: 4]
+    // ATF_COM
+    // ATF_PERM
+    // ATF_PUBL
+    // ATF_USETRAILERS
+} rarp_entry_info;
+
 // Routing operations 
 int add_route(const char *, const char *, const char *, const char *);
 int delete_route(const char *, const char *, const char *);
@@ -148,7 +159,7 @@ int set_arp_entry(const char *, const char *, const char *);
 
 // RARP Operation
 int delete_rarp_entry(const char *);
-int get_rarp_entry(const char *);
+int get_rarp_entry(const char *, rarp_entry_info *);
 int set_rarp_entry(const char *, const char *);
 
 // Interface Info Operation for debug
