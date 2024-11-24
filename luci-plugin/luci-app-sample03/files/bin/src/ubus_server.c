@@ -182,29 +182,29 @@ static int handle_rtmsg_method(struct ubus_context *, struct ubus_object *,
 			  struct ubus_request_data *, const char *,
 			  struct blob_attr *);
 
-static int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
-			  struct ubus_request_data *req, const char *method,
-			  struct blob_attr *msg);
+static int list_if_method(struct ubus_context *, struct ubus_object *,
+			  struct ubus_request_data *, const char *,
+			  struct blob_attr *);
 
-static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj,
-                        struct ubus_request_data *req, const char *method,
-                        struct blob_attr *msg);
+static int get_if_flags_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
 
-static int get_if_ipv4_method(struct ubus_context *ctx, struct ubus_object *obj,
-                        struct ubus_request_data *req, const char *method,
-                        struct blob_attr *msg);
+static int get_if_ipv4_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
 
-static int get_dest_addr_method(struct ubus_context *ctx, struct ubus_object *obj,
-                        struct ubus_request_data *req, const char *method,
-                        struct blob_attr *msg);
+static int get_dest_addr_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
 
-static int get_mtu_method(struct ubus_context *ctx, struct ubus_object *obj,
-                        struct ubus_request_data *req, const char *method,
-                        struct blob_attr *msg);
+static int get_mtu_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
 
-static int get_mac_addr_method(struct ubus_context *ctx, struct ubus_object *obj,
-                        struct ubus_request_data *req, const char *method,
-                        struct blob_attr *msg);
+static int get_mac_addr_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
 
 void ubus_process(void);
 
