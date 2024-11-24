@@ -127,6 +127,15 @@ typedef struct rarp_entry_info {
     // ATF_USETRAILERS
 } rarp_entry_info;
 
+typedef struct map_info {
+    char mem_start[256];
+    char mem_end[256];
+    char base_addr[256];
+    int irq;
+    int dma;
+    int port;
+} map_info;
+
 // Routing operations 
 int add_route(const char *, const char *, const char *, const char *);
 int delete_route(const char *, const char *, const char *);
@@ -163,7 +172,7 @@ int get_rarp_entry(const char *, rarp_entry_info *);
 int set_rarp_entry(const char *, const char *);
 
 // Interface Info Operation for debug
-int get_if_map(const char *);
+int get_if_map(const char *, map_info *);
 int set_if_map(const char *, struct ifmap *);
 int get_tx_que_len(const char *);
 #endif

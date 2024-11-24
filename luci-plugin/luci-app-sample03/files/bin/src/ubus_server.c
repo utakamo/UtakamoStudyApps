@@ -172,6 +172,19 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 				return;
 		}
 	}
+
+	// get_if_map Error Message
+	if (strcmp(method, "get_if_map") == 0) {
+		switch (result) {
+			case ERR_IOCTL:
+				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCGIFMAP).");
+				return;
+
+			default:
+				blobmsg_add_string(blob, "Error", "Unknown");
+				return;
+		}
+	}
 }
 
 /* Ubus method policy */
@@ -210,6 +223,10 @@ static const struct blobmsg_policy get_rarp_entry_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="neighbor mac address", .type=BLOBMSG_TYPE_STRING },
 };
 
+static const struct blobmsg_policy get_if_map_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
+};
+
 /* ubus methods */
 static int handle_rtmsg_method(struct ubus_context *, struct ubus_object *,
 			  struct ubus_request_data *, const char *,
@@ -244,6 +261,10 @@ static int get_arp_entry_method(struct ubus_context *, struct ubus_object *,
                         struct blob_attr *);
 
 static int get_rarp_entry_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
+
+static int get_if_map_method(struct ubus_context *, struct ubus_object *,
                         struct ubus_request_data *, const char *,
                         struct blob_attr *);
 
@@ -692,6 +713,50 @@ static int get_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *o
 	return 0;
 }
 
+// usage:
+// root@OpenWrt:~# ubus call luci-app-sample03 get_arp_entry '{"neighbor ip address":"192.168.1.1"}'
+static int get_if_map_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+    blobmsg_parse(get_if_map_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+    if (!tb[UBUS_METHOD_ARGUMENT_1]){
+        blob_buf_init(&blob, 0);
+        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        ubus_send_reply(ctx, req, blob.head);
+        return -1;
+    }
+
+	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+
+	blob_buf_init(&blob, 0);
+
+	if (strlen(ifname) > IFNAMSIZ) {
+		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	map_info info;
+	int result = get_if_map(ifname, &info);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		blobmsg_add_string(&blob, "mem_start", info.mem_start);
+		blobmsg_add_string(&blob, "mem_end", info.mem_end);
+		blobmsg_add_string(&blob, "base_addr", info.base_addr);
+		blobmsg_add_u32(&blob, "irq", info.irq);
+		blobmsg_add_u32(&blob, "dma", info.dma);
+		blobmsg_add_u32(&blob, "port", info.port);
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+	return 0;
+}
+
 /* Ubus object methods */
 const struct ubus_method ubus_sample_methods[] =
 {
@@ -734,6 +799,10 @@ const struct ubus_method ubus_sample_methods[] =
 
 #ifdef SUPPORT_GET_RARP_ENTRY
 	UBUS_METHOD("get_rarp_entry", get_rarp_entry_method, get_rarp_entry_method_policy),
+#endif
+
+#ifdef SUPPORT_GET_IF_MAP
+	UBUS_METHOD("get_if_map", get_if_map_method, get_if_map_method_policy),
 #endif
 };
 

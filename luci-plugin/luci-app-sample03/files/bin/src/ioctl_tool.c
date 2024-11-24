@@ -1024,10 +1024,11 @@ int delete_rarp_entry(const char *ip_addr) {
 
 #ifdef SUPPORT_GET_RARP_ENTRY
 /*
-* 
+* Get the corresponding IP address from the MAC address of the adjacent device.
 *
-*
-*
+* usage:
+* rarp_entry_info info;
+* get_rarp_entry("AA:BB:CC:DD:EE:FF", &info);
 */
 int get_rarp_entry(const char *neigh_mac_addr, rarp_entry_info *info) {
 
@@ -1135,7 +1136,7 @@ int set_rarp_entry(const char *ip_addr, const char *mac_addr) {
 *
 *
 */
-int get_if_map(const char *ifname) {
+int get_if_map(const char *ifname, map_info *info) {
 
     int sockfd;
     struct ifreq ifr;
@@ -1154,13 +1155,12 @@ int get_if_map(const char *ifname) {
     }
 
     map = &ifr.ifr_map;
-    printf("Interface: %s\n", ifname);
-    printf("  mem_start: 0x%lx\n", map->mem_start);
-    printf("  mem_end:   0x%lx\n", map->mem_end);
-    printf("  base_addr: 0x%x\n", map->base_addr);
-    printf("  irq:       %d\n", map->irq);
-    printf("  dma:       %d\n", map->dma);
-    printf("  port:      %d\n", map->port);
+    snprintf(info->mem_start, 256, "0x%lx", map->mem_start);
+    snprintf(info->mem_end, 256, "0x%lx", map->mem_end);
+    snprintf(info->base_addr, 256, "0x%x", map->base_addr);
+    info->irq = map->irq;
+    info->dma = map->dma;
+    info->port = map->port;
 
     close(sockfd);
     return 0;
