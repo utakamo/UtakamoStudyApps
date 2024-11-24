@@ -147,7 +147,7 @@ int get_ifname_from_idx(int, char *, size_t);
 int set_if_link(const char *, int);
 int list_if(if_list *, int);
 int get_if_flags(const char *, flag_info *);
-int set_interface_flags(const char *, short, short);
+int set_if_flags(const char *, short, short);
 
 // Address operations
 int get_if_ipv4(const char *, char *, size_t); 

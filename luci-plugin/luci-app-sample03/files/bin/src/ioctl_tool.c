@@ -330,7 +330,7 @@ int get_if_flags(const char *ifname, flag_info *info) {
 * usage:
 * set_interface("eth0", 0x1, 0x0);
 */
-int set_interface_flags(const char *ifname, short flags_to_set, short flags_to_clear) {
+int set_if_flags(const char *ifname, short flags_to_set, short flags_to_clear) {
     int sockfd;
     struct ifreq ifr;
 
@@ -1251,6 +1251,6 @@ int main() {
     //list_if(if_list, sizeof(if_list));
 
     //get_if_flags("eth0");
-    //set_interface_flags("eth", 0x01, 0x0);
+    //set_if_flags("eth", 0x01, 0x0);
 }
 */
