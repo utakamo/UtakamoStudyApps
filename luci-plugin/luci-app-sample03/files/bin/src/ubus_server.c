@@ -93,6 +93,19 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 				return;
 		}
 	}
+
+	// get_ifname_from_idx Error Message
+	if (strcmp(method, "get_ifname_from_idx") == 0) {
+		switch (result) {
+			case ERR_IOCTL:
+				blobmsg_add_string(blob, "Error", "Failed to retrieve interface name (SIOCGIFNAME).");
+				return;
+
+			default:
+				blobmsg_add_string(blob, "Error", "Unknown");
+				return;
+		}
+	}
 	
 	// list_if method Error Message
 	if (strcmp(method, "list_if") == 0) {
@@ -239,6 +252,16 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 }
 
 /* Ubus method policy */
+// --- TYPE List ---
+// BLOBMSG_TYPE_ARRAY
+// BLOBMSG_TYPE_TABLE
+// BLOBMSG_TYPE_STRING
+// BLOBMSG_TYPE_INT64
+// BLOBMSG_TYPE_INT32
+// BLOBMSG_TYPE_INT8
+// BLOBMSG_TYPE_BOOL
+// BLOBMSG_TYPE_DOUBLE
+
 static const struct blobmsg_policy add_route_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="destination", .type=BLOBMSG_TYPE_STRING },
 	[UBUS_METHOD_ARGUMENT_2] = { .name="gateway", .type=BLOBMSG_TYPE_STRING },
@@ -253,6 +276,11 @@ static const struct blobmsg_policy delete_route_method_policy[] = {
 };
 
 static const struct blobmsg_policy handle_rtmsg_method_policy[] = {};
+
+static const struct blobmsg_policy get_ifname_from_idx_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="if index", .type=BLOBMSG_TYPE_INT32 },
+};
+
 static const struct blobmsg_policy list_if_method_policy[] = {};
 
 static const struct blobmsg_policy get_if_flags_method_policy[] = {
@@ -307,6 +335,10 @@ static int delete_route_method(struct ubus_context *, struct ubus_object *,
 static int handle_rtmsg_method(struct ubus_context *, struct ubus_object *,
 			  struct ubus_request_data *, const char *,
 			  struct blob_attr *);
+
+static int get_ifname_from_idx_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
 
 static int list_if_method(struct ubus_context *, struct ubus_object *,
 			  struct ubus_request_data *, const char *,
@@ -464,6 +496,36 @@ int handle_rtmsg_method(struct ubus_context *ctx, struct ubus_object *obj,
 
 	ubus_send_reply(ctx, req, blob.head);
 
+	return 0;
+}
+
+int get_ifname_from_idx_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+    blobmsg_parse(get_ifname_from_idx_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+    if (!tb[UBUS_METHOD_ARGUMENT_1]) {
+        blob_buf_init(&blob, 0);
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
+        ubus_send_reply(ctx, req, blob.head);
+
+        return -1;
+    }
+
+	char ifname[IFNAMSIZ];
+	int if_idx = blobmsg_get_u32(tb[UBUS_METHOD_ARGUMENT_1]);
+
+	int result = get_ifname_from_idx(if_idx, ifname, sizeof(ifname));
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		blobmsg_add_string(&blob, "ifname", ifname);
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
 	return 0;
 }
 
@@ -953,6 +1015,10 @@ const struct ubus_method ubus_sample_methods[] =
 
 #ifdef SUPPORT_HANDLE_RTMSG
 	UBUS_METHOD("handle_rtmsg", handle_rtmsg_method, handle_rtmsg_method_policy),
+#endif
+
+#ifdef SUPPORT_GET_IFNAME_FROM_IDX
+	UBUS_METHOD("get_ifname_from_idx", get_ifname_from_idx_method, get_ifname_from_idx_method_policy),
 #endif
 
 #ifdef SUPPORT_LIST_IF

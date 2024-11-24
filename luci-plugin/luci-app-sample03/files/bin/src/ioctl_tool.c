@@ -144,15 +144,15 @@ int handle_rtmsg(char *msg, size_t msg_len) {
 }
 #endif
 
-#ifdef SUPPORT_GET_INTERFACE_NAME
+#ifdef SUPPORT_GET_IFNAME_FROM_IDX
 /*
-* Obtain its name from the interface number.
+* Get its name from the interface number.
 * 
 * usage:
 * char ifname[256];
 * get_ifname_from_idx(1, ifname, sizeof(ifname));
 */
-int get_ifname_from_idx(int if_index, char *ifname, size_t name_len) {
+int get_ifname_from_idx(int if_idx, char *ifname, size_t name_len) {
     int sockfd;
     struct ifreq ifr;
 
@@ -163,7 +163,7 @@ int get_ifname_from_idx(int if_index, char *ifname, size_t name_len) {
 
     memset(&ifr, 0, sizeof(ifr));
 
-    ifr.ifr_ifindex = if_index;
+    ifr.ifr_ifindex = if_idx;
 
     if (ioctl(sockfd, SIOCGIFNAME, &ifr) < 0) {
         close(sockfd);
