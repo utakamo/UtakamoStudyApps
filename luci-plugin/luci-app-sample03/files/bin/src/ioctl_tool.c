@@ -1205,7 +1205,7 @@ int set_if_map(const char *ifname, struct ifmap *new_map) {
 *
 *
 */
-int get_tx_que_len(const char *ifname) {
+int get_tx_que_len(const char *ifname, int *qlen) {
 
     int sockfd;
     struct ifreq ifr;
@@ -1222,8 +1222,7 @@ int get_tx_que_len(const char *ifname) {
         return ERR_IOCTL;
     }
 
-    printf("Interface: %s\n", ifname);
-    printf("Transmit Queue Length: %d\n", ifr.ifr_qlen);
+    *qlen = ifr.ifr_qlen;
 
     close(sockfd);
 

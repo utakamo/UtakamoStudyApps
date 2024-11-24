@@ -69,6 +69,7 @@
 /****************************************************/
 #define SUPPORT_GET_IF_MAP              // SIOCGIFMAP
 #define SUPPORT_SET_IF_MAP              // SIOCSIFMAP
+#define SUPPORT_GET_TX_QUE_LEN          // SIOCGIFTXQLEN
 
 #define ERR_SOCKET          1
 #define ERR_INET_PTON       2
@@ -174,5 +175,5 @@ int set_rarp_entry(const char *, const char *);
 // Interface Info Operation for debug
 int get_if_map(const char *, map_info *);
 int set_if_map(const char *, struct ifmap *);
-int get_tx_que_len(const char *);
+int get_tx_que_len(const char *ifname, int *qlen);
 #endif
