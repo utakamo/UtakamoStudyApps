@@ -398,7 +398,7 @@ static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj
 
     if (!tb[UBUS_METHOD_ARGUMENT_1]){
         blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
         ubus_send_reply(ctx, req, blob.head);
 
         return -1;
@@ -447,7 +447,7 @@ static int get_if_ipv4_method(struct ubus_context *ctx, struct ubus_object *obj,
 
     if (!tb[UBUS_METHOD_ARGUMENT_1]){
         blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
         ubus_send_reply(ctx, req, blob.head);
         return -1;
     }
@@ -487,7 +487,7 @@ static int get_dest_addr_method(struct ubus_context *ctx, struct ubus_object *ob
 
     if (!tb[UBUS_METHOD_ARGUMENT_1]){
         blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
         ubus_send_reply(ctx, req, blob.head);
         return -1;
     }
@@ -527,7 +527,7 @@ static int get_bcast_addr_method(struct ubus_context *ctx, struct ubus_object *o
 
     if (!tb[UBUS_METHOD_ARGUMENT_1]){
         blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
         ubus_send_reply(ctx, req, blob.head);
         return -1;
     }
@@ -567,7 +567,7 @@ static int get_mtu_method(struct ubus_context *ctx, struct ubus_object *obj,
 
     if (!tb[UBUS_METHOD_ARGUMENT_1]){
         blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
         ubus_send_reply(ctx, req, blob.head);
         return -1;
     }
@@ -606,7 +606,7 @@ static int get_mac_addr_method(struct ubus_context *ctx, struct ubus_object *obj
 
     if (!tb[UBUS_METHOD_ARGUMENT_1]){
         blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
         ubus_send_reply(ctx, req, blob.head);
         return -1;
     }
@@ -645,7 +645,7 @@ static int get_arp_entry_method(struct ubus_context *ctx, struct ubus_object *ob
 
     if (!tb[UBUS_METHOD_ARGUMENT_1]){
         blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
         ubus_send_reply(ctx, req, blob.head);
         return -1;
     }
@@ -695,7 +695,7 @@ static int get_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *o
 
     if (!tb[UBUS_METHOD_ARGUMENT_1]){
         blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
         ubus_send_reply(ctx, req, blob.head);
         return -1;
     }
@@ -745,7 +745,7 @@ static int get_if_map_method(struct ubus_context *ctx, struct ubus_object *obj,
 
     if (!tb[UBUS_METHOD_ARGUMENT_1]){
         blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
         ubus_send_reply(ctx, req, blob.head);
         return -1;
     }
@@ -789,7 +789,7 @@ static int get_tx_que_len_method(struct ubus_context *ctx, struct ubus_object *o
 
     if (!tb[UBUS_METHOD_ARGUMENT_1]){
         blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
         ubus_send_reply(ctx, req, blob.head);
         return -1;
     }
