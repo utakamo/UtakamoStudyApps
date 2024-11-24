@@ -143,7 +143,7 @@ int delete_route(const char *, const char *, const char *);
 int handle_rtmsg(char *, size_t);
 
 // Network interface operations
-int get_interface_name(int, char *, size_t);
+int get_ifname_from_idx(int, char *, size_t);
 int set_if_link(const char *, int);
 int list_if(if_list *, int);
 int get_if_flags(const char *, flag_info *);

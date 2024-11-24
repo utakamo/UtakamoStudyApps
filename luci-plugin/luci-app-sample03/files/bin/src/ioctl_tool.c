@@ -150,9 +150,9 @@ int handle_rtmsg(char *msg, size_t msg_len) {
 * 
 * usage:
 * char ifname[256];
-* get_interface_name(1, ifname, sizeof(ifname));
+* get_ifname_from_idx(1, ifname, sizeof(ifname));
 */
-int get_interface_name(int if_index, char *ifname, size_t name_len) {
+int get_ifname_from_idx(int if_index, char *ifname, size_t name_len) {
     int sockfd;
     struct ifreq ifr;
 
@@ -1242,7 +1242,7 @@ int main() {
     //printf("%s\n", message);
 
     //char ifname[256];
-    //get_interface_name(1, ifname, sizeof(ifname));
+    //get_ifname_from_idx(1, ifname, sizeof(ifname));
     //printf("%s\n", ifname);
 
     //set_if_link("eth0", 1);

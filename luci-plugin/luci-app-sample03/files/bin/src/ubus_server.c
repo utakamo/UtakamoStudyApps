@@ -38,9 +38,47 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			blobmsg_add_string(blob, "Error", "Failed to convert ip address.");
 			return;
 
+		case ERR_INET_PTON_DST:
+			blobmsg_add_string(blob, "Error", "Failed to convert destination ip address.");
+			return;
+		
+		case ERR_INET_PTON_GT:
+			blobmsg_add_string(blob, "Error", "Failed to convert gateway ip address.");
+			return;
+
+		case ERR_INET_PTON_MASK:
+			blobmsg_add_string(blob, "Error", "Failed to convert gateway ip address.");
+			return;
+
 		case ERR_MAC_FORMAT:
 			blobmsg_add_string(blob, "Error", "Invalid MAC Address Format.");
 			return;
+	}
+
+	// add_route Error Message
+	if (strcmp(method, "add_route") == 0) {
+		switch (result) {
+			case ERR_IOCTL:
+				blobmsg_add_string(blob, "Error", "Failed to add routing table (SIOCADDRT).");
+				return;
+
+			default:
+				blobmsg_add_string(blob, "Error", "Unknown");
+				return;
+		}
+	}
+
+	// delete_route Error Message
+	if (strcmp(method, "delete_route") == 0) {
+		switch (result) {
+			case ERR_IOCTL:
+				blobmsg_add_string(blob, "Error", "Failed to delete routing table (SIOCDELRT).");
+				return;
+
+			default:
+				blobmsg_add_string(blob, "Error", "Unknown");
+				return;
+		}
 	}
 
 	// handle_rtmsg Error Message
@@ -208,6 +246,12 @@ static const struct blobmsg_policy add_route_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_4] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
 };
 
+static const struct blobmsg_policy delete_route_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="destination", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_2] = { .name="netmask", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_3] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
+};
+
 static const struct blobmsg_policy handle_rtmsg_method_policy[] = {};
 static const struct blobmsg_policy list_if_method_policy[] = {};
 
@@ -256,6 +300,10 @@ static int add_route_method(struct ubus_context *, struct ubus_object *,
                         struct ubus_request_data *, const char *,
                         struct blob_attr *);
 
+static int delete_route_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
+
 static int handle_rtmsg_method(struct ubus_context *, struct ubus_object *,
 			  struct ubus_request_data *, const char *,
 			  struct blob_attr *);
@@ -299,7 +347,6 @@ static int get_if_map_method(struct ubus_context *, struct ubus_object *,
 static int get_tx_que_len_method(struct ubus_context *, struct ubus_object *,
                         struct ubus_request_data *, const char *,
                         struct blob_attr *);
-
 
 void ubus_process(void);
 
@@ -362,6 +409,38 @@ int add_route_method(struct ubus_context *ctx, struct ubus_object *obj,
 		blobmsg_error(&blob, result, method);
 	} else {
 		blobmsg_add_string(&blob, "Success", "Add new routing table");
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+	return 0;
+}
+
+int delete_route_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+    blobmsg_parse(delete_route_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+    if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]
+		|| !tb[UBUS_METHOD_ARGUMENT_3] || !tb[UBUS_METHOD_ARGUMENT_4]){
+        blob_buf_init(&blob, 0);
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
+        ubus_send_reply(ctx, req, blob.head);
+
+        return -1;
+    }
+
+	const char *dest = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+	const char *netmask = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_2]);
+	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_3]);
+
+	int result = delete_route(dest, netmask, ifname);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		blobmsg_add_string(&blob, "Success", "Delete routing table");
 	}
 
 	ubus_send_reply(ctx, req, blob.head);
@@ -866,6 +945,10 @@ const struct ubus_method ubus_sample_methods[] =
 	/* UBUS_METHOD(method_name, method_call_function, method_policy) */
 #ifdef SUPPORT_ADD_ROUTE
 	UBUS_METHOD("add_route", add_route_method, add_route_method_policy),
+#endif
+
+#ifdef SUPPORT_DELETE_ROUTE
+	UBUS_METHOD("delete_route", delete_route_method, delete_route_method_policy),
 #endif
 
 #ifdef SUPPORT_HANDLE_RTMSG
