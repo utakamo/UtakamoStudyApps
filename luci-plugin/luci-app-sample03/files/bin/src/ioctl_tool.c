@@ -67,7 +67,8 @@ int add_route(const char *dest, const char *gateway, const char *netmask, const 
 * usage: delete_route("192.168.1.0", "255.255.255.0", "eth0");
 * ---> ip route del 192.168.1.0/24 dev eth0
 */
-int delete_route(const char *destination, const char *netmask, const char *interface) {
+int delete_route(const char *dest, const char *netmask, const char *ifname) {
+
     int sockfd;
     struct rtentry route;
     struct sockaddr_in *addr;
@@ -82,7 +83,7 @@ int delete_route(const char *destination, const char *netmask, const char *inter
 
     addr = (struct sockaddr_in *)&route.rt_dst;
     addr->sin_family = AF_INET;
-    if (inet_pton(AF_INET, destination, &addr->sin_addr) <= 0) {
+    if (inet_pton(AF_INET, dest, &addr->sin_addr) <= 0) {
         close(sockfd);
         return ERR_INET_PTON_DST;
     }
@@ -94,7 +95,7 @@ int delete_route(const char *destination, const char *netmask, const char *inter
         return ERR_INET_PTON_MASK;
     }
 
-    route.rt_dev = (char *)interface;
+    route.rt_dev = (char *)ifname;
 
     if (ioctl(sockfd, SIOCDELRT, &route) < 0) {
         close(sockfd);
