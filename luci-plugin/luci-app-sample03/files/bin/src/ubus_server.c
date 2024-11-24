@@ -281,6 +281,11 @@ static const struct blobmsg_policy get_ifname_from_idx_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="if index", .type=BLOBMSG_TYPE_INT32 },
 };
 
+static const struct blobmsg_policy set_if_link_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_2] = { .name="link index", .type=BLOBMSG_TYPE_INT32 },
+};
+
 static const struct blobmsg_policy list_if_method_policy[] = {};
 
 static const struct blobmsg_policy get_if_flags_method_policy[] = {
@@ -337,6 +342,10 @@ static int handle_rtmsg_method(struct ubus_context *, struct ubus_object *,
 			  struct blob_attr *);
 
 static int get_ifname_from_idx_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
+
+static int set_if_link_method(struct ubus_context *, struct ubus_object *,
                         struct ubus_request_data *, const char *,
                         struct blob_attr *);
 
@@ -523,6 +532,38 @@ int get_ifname_from_idx_method(struct ubus_context *ctx, struct ubus_object *obj
 		blobmsg_error(&blob, result, method);
 	} else {
 		blobmsg_add_string(&blob, "ifname", ifname);
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+	return 0;
+}
+
+int set_if_link_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+    blobmsg_parse(set_if_link_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+    if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]) {
+        blob_buf_init(&blob, 0);
+        blobmsg_add_string(&blob, "Error", "Mismatch Key");
+        ubus_send_reply(ctx, req, blob.head);
+
+        return -1;
+    }
+
+	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+	int if_idx = blobmsg_get_u32(tb[UBUS_METHOD_ARGUMENT_2]);
+
+	int result = set_if_link(ifname, if_idx);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		char message[64];
+		snprintf(message, sizeof(message), "Set the link number %d on %s.", if_idx, ifname);
+		blobmsg_add_string(&blob, "Success", message);
 	}
 
 	ubus_send_reply(ctx, req, blob.head);
@@ -1019,6 +1060,10 @@ const struct ubus_method ubus_sample_methods[] =
 
 #ifdef SUPPORT_GET_IFNAME_FROM_IDX
 	UBUS_METHOD("get_ifname_from_idx", get_ifname_from_idx_method, get_ifname_from_idx_method_policy),
+#endif
+
+#ifdef SUPPORT_SET_IF_LINK
+	UBUS_METHOD("set_if_link", set_if_link_method, set_if_link_method_policy),
 #endif
 
 #ifdef SUPPORT_LIST_IF

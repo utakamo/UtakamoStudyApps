@@ -189,7 +189,7 @@ int get_ifname_from_idx(int if_idx, char *ifname, size_t name_len) {
 * usage:
 * set_if_link("eth0", 1);
 */
-int set_if_link(const char *ifname, int link_index) {
+int set_if_link(const char *ifname, int link_idx) {
 
     int sockfd;
     struct ifreq ifr;
@@ -203,7 +203,7 @@ int set_if_link(const char *ifname, int link_index) {
 
     strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
 
-    ifr.ifr_ifindex = link_index;
+    ifr.ifr_ifindex = link_idx;
 
     if (ioctl(sockfd, SIOCSIFLINK, &ifr) < 0) {
         close(sockfd);
