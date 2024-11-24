@@ -125,7 +125,7 @@ int set_dest_addr(const char *, const char *);
 int get_bcast_addr(const char *, char *, size_t);
 
 // Other interface attribute operations
-int get_mtu(const char *);
+int get_mtu(const char *, int *);
 int set_mtu(const char *, int); 
 int get_mac_addr(const char *);
 int set_mac_addr(const char *, const char *);

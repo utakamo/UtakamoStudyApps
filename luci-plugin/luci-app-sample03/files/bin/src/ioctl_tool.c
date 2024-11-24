@@ -684,11 +684,13 @@ int set_netmask(const char *ifname, const char *netmask) {
 
 #ifdef SUPPORT_GET_MTU
 /*
+* Get the mtu of target interface
 *
-*
-*
+* usage:
+* int mtu;
+* get_mtu("eth0", &mtu);
 */
-int get_mtu(const char *ifname) {
+int get_mtu(const char *ifname, int *mtu) {
 
     int sockfd;
     struct ifreq ifr;
@@ -707,7 +709,7 @@ int get_mtu(const char *ifname) {
         return ERR_IOCTL;
     }
 
-    printf("MTU for interface %s: %d\n", ifname, ifr.ifr_mtu);
+    *mtu = ifr.ifr_mtu;
 
     close(sockfd);
     return 0;
