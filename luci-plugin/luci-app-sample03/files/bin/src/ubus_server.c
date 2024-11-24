@@ -146,6 +146,19 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 				return;
 		}
 	}
+
+	// get_arp_entry Error Message
+	if (strcmp(method, "get_arp_entry") == 0) {
+		switch (result) {
+			case ERR_IOCTL:
+				blobmsg_add_string(blob, "Error", "Target ip address is not found (SIOCGARP).");
+				return;
+
+			default:
+				blobmsg_add_string(blob, "Error", "Unknown");
+				return;
+		}
+	}
 }
 
 /* Ubus method policy */
@@ -176,6 +189,10 @@ static const struct blobmsg_policy get_mac_addr_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
 };
 
+static const struct blobmsg_policy get_arp_entry_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="neighbor ip address", .type=BLOBMSG_TYPE_STRING },
+};
+
 
 /* ubus methods */
 static int handle_rtmsg_method(struct ubus_context *, struct ubus_object *,
@@ -203,6 +220,10 @@ static int get_mtu_method(struct ubus_context *, struct ubus_object *,
                         struct blob_attr *);
 
 static int get_mac_addr_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
+
+static int get_arp_entry_method(struct ubus_context *, struct ubus_object *,
                         struct ubus_request_data *, const char *,
                         struct blob_attr *);
 
@@ -337,7 +358,7 @@ static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj
 
 		blobmsg_add_string(&blob, "flag", info.flag);
 
-		for (i = 0; i < 7; i++) {
+		for (i = 0; i < MAX_FLAG_NUM; i++) {
 			if (strlen(info.message[i]) > 0) {
 				snprintf(msg_key_name, sizeof(msg_key_name), "%s%d", "message_", (i + 1));
 				blobmsg_add_string(&blob, msg_key_name, info.message[i]);
@@ -374,6 +395,7 @@ static int get_if_ipv4_method(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (strlen(ifname) > IFNAMSIZ) {
 		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
 		return -1;
 	}
 
@@ -413,6 +435,7 @@ static int get_dest_addr_method(struct ubus_context *ctx, struct ubus_object *ob
 
 	if (strlen(ifname) > IFNAMSIZ) {
 		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
 		return -1;
 	}
 
@@ -452,6 +475,7 @@ static int get_bcast_addr_method(struct ubus_context *ctx, struct ubus_object *o
 
 	if (strlen(ifname) > IFNAMSIZ) {
 		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
 		return -1;
 	}
 
@@ -491,6 +515,7 @@ static int get_mtu_method(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (strlen(ifname) > IFNAMSIZ) {
 		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
 		return -1;
 	}
 
@@ -529,6 +554,7 @@ static int get_mac_addr_method(struct ubus_context *ctx, struct ubus_object *obj
 
 	if (strlen(ifname) > IFNAMSIZ) {
 		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
 		return -1;
 	}
 
@@ -539,6 +565,56 @@ static int get_mac_addr_method(struct ubus_context *ctx, struct ubus_object *obj
 		blobmsg_error(&blob, result, method);
 	} else {
 		blobmsg_add_string(&blob, "MAC address", mac_addr);
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+	return 0;
+}
+
+// usage:
+// root@OpenWrt:~# ubus call luci-app-sample03 get_arp_entry '{"ip address":"192.168.1.1"}'
+static int get_arp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+    blobmsg_parse(get_arp_entry_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+    if (!tb[UBUS_METHOD_ARGUMENT_1]){
+        blob_buf_init(&blob, 0);
+        blobmsg_add_string(&blob, "Error", "No input or Insufficient argument.");
+        ubus_send_reply(ctx, req, blob.head);
+        return -1;
+    }
+
+	const char *ip_addr = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+
+	blob_buf_init(&blob, 0);
+
+	if (strlen(ip_addr) > INET_ADDRSTRLEN) {
+		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	arp_entry_info info;
+	int result = get_arp_entry(ip_addr, &info);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		blobmsg_add_string(&blob, "MAC address", info.mac_addr);
+		blobmsg_add_string(&blob, "FLAG", info.flag);
+		void *s = blobmsg_open_table(&blob, "info");
+		int i;
+		for (i = 0; i < MAX_FLAG_NUM; i++) {
+			char msg_key_name[256];
+			snprintf(msg_key_name, sizeof(msg_key_name), "message_%d", (i + 1));
+			if (strlen(info.message[i]) > 0) {
+				blobmsg_add_string(&blob, msg_key_name, info.message[i]);
+			}
+		}
+		blobmsg_close_table(&blob, s);
 	}
 
 	ubus_send_reply(ctx, req, blob.head);
@@ -579,6 +655,10 @@ const struct ubus_method ubus_sample_methods[] =
 
 #ifdef SUPPORT_GET_MAC_ADDR
 	UBUS_METHOD("get_mac_addr", get_mac_addr_method, get_mac_addr_method_policy),
+#endif
+
+#ifdef SUPPORT_GET_ARP_ENTRY
+	UBUS_METHOD("get_arp_entry", get_arp_entry_method, get_arp_entry_method_policy),
 #endif
 };
 

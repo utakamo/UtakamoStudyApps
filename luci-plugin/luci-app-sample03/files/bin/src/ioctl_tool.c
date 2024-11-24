@@ -873,11 +873,13 @@ int delete_arp_entry(const char *ip_addr) {
 
 #ifdef SUPPORT_GET_ARP_ENTRY
 /*
+* Get the ARP entry corresponding to the IP address of the neighbor device.
 *
-*
-*
+* usage:
+* arp_entry_info info;
+* get_arp_entry("192.168.1.1", &info);
 */
-int get_arp_entry(const char *ip_addr) {
+int get_arp_entry(const char *neigh_ip_addr, arp_entry_info *info) {
 
     int sockfd;
     struct arpreq req;
@@ -892,7 +894,7 @@ int get_arp_entry(const char *ip_addr) {
 
     sin = (struct sockaddr_in *)&req.arp_pa;
     sin->sin_family = AF_INET;
-    if (inet_pton(AF_INET, ip_addr, &sin->sin_addr) != 1) {
+    if (inet_pton(AF_INET, neigh_ip_addr, &sin->sin_addr) != 1) {
         close(sockfd);
         return ERR_INET_PTON;
     }
@@ -903,22 +905,25 @@ int get_arp_entry(const char *ip_addr) {
     }
 
     unsigned char *mac = (unsigned char *)req.arp_ha.sa_data;
-    printf("IP Address: %s\n", ip_addr);
-    printf("MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+    //snprintf(info->ip_addr, INET_ADDRSTRLEN, "%s", ip_addr);
+    snprintf(info->mac_addr, 64, "%02x:%02x:%02x:%02x:%02x:%02x",
            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-    printf("Flags: 0x%x\n", req.arp_flags);
+    snprintf(info->flag, MAX_FLAG_STRING, "0x%x\n", req.arp_flags);
+
+    int item = 0;
+
     if (req.arp_flags & ATF_COM) {
-        printf("  - Entry is complete\n");
+        snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Entry is complete (ATF_COM)");
     }
     if (req.arp_flags & ATF_PERM) {
-        printf("  - Entry is permanent\n");
+        snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Entry is permanent (ATF_PERM)");
     }
     if (req.arp_flags & ATF_PUBL) {
-        printf("  - Entry is published\n");
+        snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Entry is published (ATF_PUBL)");
     }
     if (req.arp_flags & ATF_USETRAILERS) {
-        printf("  - Use trailers\n");
+        snprintf(info->message[item++], MAX_FLAG_MESSAGE, "Use trailers (ATF_USETRAILERS)");
     }
 
     close(sockfd);
