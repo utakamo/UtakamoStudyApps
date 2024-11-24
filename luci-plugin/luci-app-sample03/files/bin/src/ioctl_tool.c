@@ -753,15 +753,18 @@ int set_mtu(const char *ifname, int mtu) {
 
 #ifdef SUPPORT_GET_MAC_ADDR
 /*
+* Get the mac address of an interface.
 *
-*
-*
-*
+* usage:
+* char mac_addr[64];
+* get_mac_addr("eth0", mac_addr, sizeof(mac_addr));
 */
-int get_mac_addr(const char *ifname) {
+int get_mac_addr(const char *ifname, char *mac_addr, size_t addr_len) {
 
     int sockfd;
     struct ifreq ifr;
+
+    memset(mac_addr, '\0', addr_len);
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
@@ -779,8 +782,8 @@ int get_mac_addr(const char *ifname) {
 
     unsigned char *mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
 
-    printf("MAC address for interface %s: %02x:%02x:%02x:%02x:%02x:%02x\n",
-           ifname, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    snprintf(mac_addr, addr_len, "%02x:%02x:%02x:%02x:%02x:%02x",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
     close(sockfd);
     return 0;
