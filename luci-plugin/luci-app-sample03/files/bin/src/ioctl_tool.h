@@ -29,7 +29,7 @@
 #define SUPPORT_SET_IF_LINK             // SIOCSIFLINK
 #define SUPPORT_LIST_IF                 // SIOCGIFCONF
 #define SUPPORT_GET_IF_FLAGS            // SIOCGIFFLAGS
-#define SUPPORT_SET_INTERFACE_FLAGS     // SIOCSIFFLAGS
+#define SUPPORT_SET_IF_FLAGS     // SIOCSIFFLAGS
 
 /********************************/
 /*      Address operations      */

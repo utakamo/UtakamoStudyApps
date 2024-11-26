@@ -323,14 +323,16 @@ int get_if_flags(const char *ifname, flag_info *info) {
 }
 #endif
 
-#ifdef SUPPORT_SET_INTERFACE_FLAGS
+#ifdef SUPPORT_SET_IF_FLAGS
 /*
 * Set network interface flags.
 * 
 * usage:
+* char flag[16];
 * set_interface("eth0", 0x1, 0x0);
 */
 int set_if_flags(const char *ifname, short flags_to_set, short flags_to_clear) {
+
     int sockfd;
     struct ifreq ifr;
 
@@ -340,15 +342,7 @@ int set_if_flags(const char *ifname, short flags_to_set, short flags_to_clear) {
     }
 
     memset(&ifr, 0, sizeof(ifr));
-
     strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
-
-    if (ioctl(sockfd, SIOCGIFFLAGS, &ifr) < 0) {
-        close(sockfd);
-        return ERR_IOCTL;
-    }
-
-    printf("Current flags for interface %s: 0x%x\n", ifname, ifr.ifr_flags);
 
     ifr.ifr_flags |= flags_to_set;
     ifr.ifr_flags &= ~flags_to_clear;
@@ -357,8 +351,6 @@ int set_if_flags(const char *ifname, short flags_to_set, short flags_to_clear) {
         close(sockfd);
         return ERR_IOCTL;
     }
-
-    printf("Updated flags for interface %s: 0x%x\n", ifname, ifr.ifr_flags);
 
     close(sockfd);
 
