@@ -396,13 +396,13 @@ int get_if_ipv4(const char *ifname, char *ipv4_addr, size_t addr_len) {
 }
 #endif
 
-#ifdef SUPPORT_SET_INTERFACE_IP
+#ifdef SUPPORT_SET_IF_IPV4
 /*
 * 
 *
 *
 */
-int set_interface_ip(const char *ifname, const char *ip_address) {
+int set_if_ipv4(const char *ifname, const char *ip_address) {
 
     int sockfd;
     struct ifreq ifr;
