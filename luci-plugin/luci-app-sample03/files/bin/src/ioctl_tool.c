@@ -398,9 +398,10 @@ int get_if_ipv4(const char *ifname, char *ipv4_addr, size_t addr_len) {
 
 #ifdef SUPPORT_SET_IF_IPV4
 /*
-* 
+* Set IPv4 address on the target interface.
 *
-*
+* usage:
+* set_if_ipv4("eth0", "192.168.1.2");
 */
 int set_if_ipv4(const char *ifname, const char *ip_address) {
 
