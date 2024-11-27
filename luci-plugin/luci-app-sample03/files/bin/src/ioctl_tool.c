@@ -927,12 +927,12 @@ int get_arp_entry(const char *neigh_ip_addr, arp_entry_info *info) {
 
 #ifdef SUPPORT_SET_ARP_ENTRY
 /*
-*
-*
-*
-*
+* 
+* 
+* 
+* 
 */
-int set_arp_entry(const char *ip_addr, const char *mac_addr, const char *interface) {
+int set_arp_entry(const char *ifname, const char *ip_addr, const char *mac_addr) {
 
     int sockfd;
     struct arpreq req;
@@ -961,7 +961,7 @@ int set_arp_entry(const char *ip_addr, const char *mac_addr, const char *interfa
     memcpy(req.arp_ha.sa_data, mac, ETH_ALEN);
     req.arp_ha.sa_family = ARPHRD_ETHER;
 
-    strncpy(req.arp_dev, interface, sizeof(req.arp_dev) - 1);
+    strncpy(req.arp_dev, ifname, sizeof(req.arp_dev) - 1);
 
     req.arp_flags = ATF_COM | ATF_PERM;
 
@@ -970,7 +970,7 @@ int set_arp_entry(const char *ip_addr, const char *mac_addr, const char *interfa
         return ERR_IOCTL;
     }
 
-    printf("Successfully added ARP entry for IP: %s\n", ip_addr);
+    //printf("Successfully added ARP entry for IP: %s\n", ip_addr);
 
     close(sockfd);
     return 0;
