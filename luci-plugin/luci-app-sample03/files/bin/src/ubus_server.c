@@ -23,6 +23,8 @@ enum {
 	UBUS_METHOD_ARGUMENT_3,
 	UBUS_METHOD_ARGUMENT_4,
 	UBUS_METHOD_ARGUMENT_5,
+	UBUS_METHOD_ARGUMENT_6,
+	UBUS_METHOD_ARGUMENT_7,
 	UBUS_METHOD_ARGUMENT_MAX,
 };
 
@@ -376,6 +378,16 @@ static const struct blobmsg_policy get_if_map_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
 };
 
+static const struct blobmsg_policy set_if_map_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_2] = { .name="mem_start", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_3] = { .name="mem_end", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_4] = { .name="base_addr", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_5] = { .name="irq", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_6] = { .name="dma", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_7] = { .name="port", .type=BLOBMSG_TYPE_STRING },
+};
+
 static const struct blobmsg_policy get_tx_que_len_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
 };
@@ -448,6 +460,10 @@ static int get_rarp_entry_method(struct ubus_context *, struct ubus_object *,
                         struct blob_attr *);
 
 static int get_if_map_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
+
+static int set_if_map_method(struct ubus_context *, struct ubus_object *,
                         struct ubus_request_data *, const char *,
                         struct blob_attr *);
 
@@ -1181,6 +1197,71 @@ static int get_if_map_method(struct ubus_context *ctx, struct ubus_object *obj,
 	return 0;
 }
 
+static int set_if_map_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+	blobmsg_parse(set_if_map_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+	if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2] || !tb[UBUS_METHOD_ARGUMENT_3] 
+		|| !tb[UBUS_METHOD_ARGUMENT_4] || !tb[UBUS_METHOD_ARGUMENT_5] || !tb[UBUS_METHOD_ARGUMENT_6]
+		|| !tb[UBUS_METHOD_ARGUMENT_7]){
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+	const char *mem_start = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_2]);
+	const char *mem_end = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_3]);
+	const char *base_addr = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_4]);
+	const char *irq = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_5]);
+	const char *dma = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_6]);
+	const char *port = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_7]);
+
+	if (strlen(ifname) > IFNAMSIZ) {
+		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	struct ifmap map;
+	map.mem_start = (unsigned long)strtol(mem_start, NULL, 16);
+	map.mem_end = (unsigned long)strtol(mem_end, NULL, 16);
+	map.base_addr = (unsigned short)strtol(base_addr, NULL, 16);
+	map.irq = (unsigned char)strtol(irq, NULL, 16);
+	map.dma = (unsigned char)strtol(dma, NULL, 16);
+	map.port = (unsigned char)strtol(port, NULL, 16);
+
+	blob_buf_init(&blob, 0);
+
+	int result = set_if_map(ifname, &map);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		map_info info;
+		int result = get_if_map(ifname, &info);
+
+		if (result != 0) {
+			blobmsg_error(&blob, result, "get_if_map");
+		} else {
+			blobmsg_add_string(&blob, "mem_start", info.mem_start);
+			blobmsg_add_string(&blob, "mem_end", info.mem_end);
+			blobmsg_add_string(&blob, "base_addr", info.base_addr);
+			blobmsg_add_u32(&blob, "irq", info.irq);
+			blobmsg_add_u32(&blob, "dma", info.dma);
+			blobmsg_add_u32(&blob, "port", info.port);
+		}
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+
+	return 0;
+}
+
 // usage:
 // root@OpenWrt:~# ubus call luci-app-sample03 get_tx_que_len '{"ifname":"eth0"}'
 static int get_tx_que_len_method(struct ubus_context *ctx, struct ubus_object *obj,
@@ -1356,6 +1437,10 @@ const struct ubus_method ubus_sample_methods[] =
 
 #ifdef SUPPORT_GET_IF_MAP
 	UBUS_METHOD("get_if_map", get_if_map_method, get_if_map_method_policy),
+#endif
+
+#ifdef SUPPORT_SET_IF_MAP
+	UBUS_METHOD("set_if_map", set_if_map_method, set_if_map_method_policy),
 #endif
 
 #ifdef SUPPORT_GET_TX_QUE_LEN

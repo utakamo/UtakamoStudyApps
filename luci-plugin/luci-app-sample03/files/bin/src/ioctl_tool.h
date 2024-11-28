@@ -67,7 +67,7 @@
 /****************************************************/
 /*       Interface Info Operation for debug         */
 /****************************************************/
-#define SUPPORT_GET_IF_MAP              // SIOCGIFMAP
+//#define SUPPORT_GET_IF_MAP              // SIOCGIFMAP
 #define SUPPORT_SET_IF_MAP              // SIOCSIFMAP
 #define SUPPORT_GET_TX_QUE_LEN          // SIOCGIFTXQLEN
 

@@ -1123,10 +1123,11 @@ int set_rarp_entry(const char *ip_addr, const char *mac_addr) {
 
 #ifdef SUPPORT_GET_IF_MAP
 /*
+* Get the address mapping information of the target interface.
 *
-*
-*
-*
+* usage:
+* map_info info;
+* get_if_map("eth0", &info);
 */
 int get_if_map(const char *ifname, map_info *info) {
 
@@ -1183,8 +1184,6 @@ int set_if_map(const char *ifname, struct ifmap *new_map) {
         close(sockfd);
         return ERR_IOCTL;
     }
-
-    printf("Hardware parameters updated for interface: %s\n", ifname);
 
     close(sockfd);
     return 0;
