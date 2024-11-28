@@ -496,14 +496,13 @@ int add_route_method(struct ubus_context *ctx, struct ubus_object *obj,
 	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
 	blobmsg_parse(add_route_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
-    if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]
+	if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]
 		|| !tb[UBUS_METHOD_ARGUMENT_3] || !tb[UBUS_METHOD_ARGUMENT_4]){
-        blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "Mismatch Key");
-        ubus_send_reply(ctx, req, blob.head);
-
-        return -1;
-    }
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
 
 	const char *dest = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
 	const char *gateway = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_2]);
@@ -529,14 +528,13 @@ int delete_route_method(struct ubus_context *ctx, struct ubus_object *obj,
 	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
 	blobmsg_parse(delete_route_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
-    if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]
+	if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]
 		|| !tb[UBUS_METHOD_ARGUMENT_3] || !tb[UBUS_METHOD_ARGUMENT_4]){
-        blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "Mismatch Key");
-        ubus_send_reply(ctx, req, blob.head);
-
-        return -1;
-    }
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
 
 	const char *dest = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
 	const char *netmask = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_2]);
@@ -581,13 +579,12 @@ int get_ifname_from_idx_method(struct ubus_context *ctx, struct ubus_object *obj
 	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
     blobmsg_parse(get_ifname_from_idx_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
-    if (!tb[UBUS_METHOD_ARGUMENT_1]) {
-        blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "Mismatch Key");
-        ubus_send_reply(ctx, req, blob.head);
-
-        return -1;
-    }
+	if (!tb[UBUS_METHOD_ARGUMENT_1]) {
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
 
 	char ifname[IFNAMSIZ];
 	int if_idx = blobmsg_get_u32(tb[UBUS_METHOD_ARGUMENT_1]);
@@ -609,15 +606,14 @@ int set_if_link_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct blob_attr *msg) {
 
 	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
-    blobmsg_parse(set_if_link_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+	blobmsg_parse(set_if_link_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
-    if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]) {
-        blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "Mismatch Key");
-        ubus_send_reply(ctx, req, blob.head);
-
-        return -1;
-    }
+	if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]) {
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
 
 	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
 	int if_idx = blobmsg_get_u32(tb[UBUS_METHOD_ARGUMENT_2]);
@@ -682,14 +678,13 @@ static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
 
-    struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
-    blobmsg_parse(get_if_flags_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+	blobmsg_parse(get_if_flags_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
 	if (!tb[UBUS_METHOD_ARGUMENT_1]){
 		blob_buf_init(&blob, 0);
 		blobmsg_add_string(&blob, "Error", "Mismatch Key");
 		ubus_send_reply(ctx, req, blob.head);
-
 		return -1;
 	}
 
@@ -731,14 +726,14 @@ static int set_if_ipv4_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct blob_attr *msg) {
 
 	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
-    blobmsg_parse(set_if_ipv4_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+	blobmsg_parse(set_if_ipv4_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
-    if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]){
-        blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "Mismatch Key");
-        ubus_send_reply(ctx, req, blob.head);
-        return -1;
-    }
+	if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]){
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
 
 	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
 	const char *ipv4_addr = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_2]);
