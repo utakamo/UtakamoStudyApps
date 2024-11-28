@@ -817,14 +817,14 @@ static int get_dest_addr_method(struct ubus_context *ctx, struct ubus_object *ob
                         struct blob_attr *msg) {
 	
 	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
-    blobmsg_parse(get_dest_addr_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+	blobmsg_parse(get_dest_addr_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
-    if (!tb[UBUS_METHOD_ARGUMENT_1]){
-        blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "Mismatch Key");
-        ubus_send_reply(ctx, req, blob.head);
-        return -1;
-    }
+	if (!tb[UBUS_METHOD_ARGUMENT_1]){
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
 
 	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
 
