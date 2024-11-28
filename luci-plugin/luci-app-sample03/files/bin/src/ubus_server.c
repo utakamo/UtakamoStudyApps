@@ -494,7 +494,7 @@ int add_route_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct blob_attr *msg) {
 
 	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
-    blobmsg_parse(add_route_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+	blobmsg_parse(add_route_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
     if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]
 		|| !tb[UBUS_METHOD_ARGUMENT_3] || !tb[UBUS_METHOD_ARGUMENT_4]){
@@ -527,7 +527,7 @@ int delete_route_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct blob_attr *msg) {
 
 	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
-    blobmsg_parse(delete_route_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+	blobmsg_parse(delete_route_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
     if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]
 		|| !tb[UBUS_METHOD_ARGUMENT_3] || !tb[UBUS_METHOD_ARGUMENT_4]){
@@ -683,16 +683,15 @@ static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj
                         struct blob_attr *msg) {
 
     struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
-
     blobmsg_parse(get_if_flags_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
-    if (!tb[UBUS_METHOD_ARGUMENT_1]){
-        blob_buf_init(&blob, 0);
-        blobmsg_add_string(&blob, "Error", "Mismatch Key");
-        ubus_send_reply(ctx, req, blob.head);
+	if (!tb[UBUS_METHOD_ARGUMENT_1]){
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
 
-        return -1;
-    }
+		return -1;
+	}
 
 	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
 	flag_info info;
@@ -704,7 +703,6 @@ static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj
 	if (result != 0) {
 		blobmsg_error(&blob, result, method);
 	} else {
-
 		int i;
 		void *s = blobmsg_open_table(&blob, "info");
 		char msg_key_name[256];
