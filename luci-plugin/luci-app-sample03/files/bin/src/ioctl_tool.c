@@ -927,10 +927,10 @@ int get_arp_entry(const char *neigh_ip_addr, arp_entry_info *info) {
 
 #ifdef SUPPORT_SET_ARP_ENTRY
 /*
+* Set new arp entry
 * 
-* 
-* 
-* 
+* usage:
+* set_arp_entry("eth0", "192.168.2.1", "aa:bb:cc:dd:ee:ff");
 */
 int set_arp_entry(const char *ifname, const char *ip_addr, const char *mac_addr) {
 
@@ -969,8 +969,6 @@ int set_arp_entry(const char *ifname, const char *ip_addr, const char *mac_addr)
         close(sockfd);
         return ERR_IOCTL;
     }
-
-    //printf("Successfully added ARP entry for IP: %s\n", ip_addr);
 
     close(sockfd);
     return 0;
