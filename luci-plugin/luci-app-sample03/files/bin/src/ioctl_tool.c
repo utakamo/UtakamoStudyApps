@@ -1193,9 +1193,11 @@ int set_if_map(const char *ifname, struct ifmap *new_map) {
 
 #ifdef SUPPORT_GET_TX_QUE_LEN
 /*
-*
-*
-*
+* Get the information of the packet transmission queue of the target interface
+* 
+* usage:
+* int qlen;
+* get_tx_que_len("eth0", &qlen);
 */
 int get_tx_que_len(const char *ifname, int *qlen) {
 
