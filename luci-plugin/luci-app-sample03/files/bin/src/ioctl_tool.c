@@ -1116,8 +1116,6 @@ int set_rarp_entry(const char *ip_addr, const char *mac_addr) {
         return ERR_IOCTL;
     }
 
-    //printf("Successfully set RARP entry for IP: %s with MAC: %s\n", ip_addr, mac_addr);
-
     close(sockfd);
     return 0;
 }
