@@ -370,6 +370,11 @@ static const struct blobmsg_policy get_arp_entry_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="neighbor ip address", .type=BLOBMSG_TYPE_STRING },
 };
 
+static const struct blobmsg_policy set_rarp_entry_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="ip address", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_2] = { .name="neighbor mac address", .type=BLOBMSG_TYPE_STRING },
+};
+
 static const struct blobmsg_policy get_rarp_entry_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="neighbor mac address", .type=BLOBMSG_TYPE_STRING },
 };
@@ -452,6 +457,10 @@ static int get_mac_addr_method(struct ubus_context *, struct ubus_object *,
                         struct blob_attr *);
 
 static int get_arp_entry_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
+
+static int set_rarp_entry_method(struct ubus_context *, struct ubus_object *,
                         struct ubus_request_data *, const char *,
                         struct blob_attr *);
 
@@ -1105,6 +1114,63 @@ static int get_arp_entry_method(struct ubus_context *ctx, struct ubus_object *ob
 
 // usasge:
 // root@OpenWrt:~# ubus call luci-app-sample03 get_rarp_entry '{"neighbor ip address":"192.168.1.1"}'
+static int set_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+	blobmsg_parse(set_rarp_entry_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+	if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]){
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	const char *ip_addr = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+	const char *mac_addr = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_2]);
+
+	blob_buf_init(&blob, 0);
+
+	if (strlen(ip_addr) > MAC_ADDRESS_LENGTH) {
+		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	if (strlen(mac_addr) > MAC_ADDRESS_LENGTH) {
+		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	rarp_entry_info info;
+	int result = get_rarp_entry(mac_addr, &info);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		blobmsg_add_string(&blob, "ip address", info.ip_addr);
+		blobmsg_add_string(&blob, "FLAG", info.flag);
+		void *s = blobmsg_open_table(&blob, "info");
+		int i;
+		for (i = 0; i < MAX_FLAG_NUM; i++) {
+			char msg_key_name[256];
+			snprintf(msg_key_name, sizeof(msg_key_name), "message_%d", (i + 1));
+			if (strlen(info.message[i]) > 0) {
+				blobmsg_add_string(&blob, msg_key_name, info.message[i]);
+			}
+		}
+		blobmsg_close_table(&blob, s);
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+	return 0;
+}
+
+// usasge:
+// root@OpenWrt:~# ubus call luci-app-sample03 get_rarp_entry '{"neighbor ip address":"192.168.1.1"}'
 static int get_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -1429,6 +1495,10 @@ const struct ubus_method ubus_sample_methods[] =
 
 #ifdef SUPPORT_GET_ARP_ENTRY
 	UBUS_METHOD("get_arp_entry", get_arp_entry_method, get_arp_entry_method_policy),
+#endif
+
+#ifdef SUPPORT_SET_RARP_ENTRY
+	UBUS_METHOD("set_rarp_entry", set_rarp_entry_method, set_rarp_entry_method_policy),
 #endif
 
 #ifdef SUPPORT_GET_RARP_ENTRY

@@ -1017,6 +1017,7 @@ int delete_rarp_entry(const char *ip_addr) {
 #ifdef SUPPORT_GET_RARP_ENTRY
 /*
 * Get the corresponding IP address from the MAC address of the adjacent device.
+* Note: Legacy
 *
 * usage:
 * rarp_entry_info info;
@@ -1070,10 +1071,11 @@ int get_rarp_entry(const char *neigh_mac_addr, rarp_entry_info *info) {
 
 #ifdef SUPPORT_SET_RARP_ENTRY
 /*
+* Set the mapping between IP addresses and the MAC addresses of adjacent devices.
+* Note: Legacy
 *
-*
-*
-*
+* usage:
+* get_rarp_entry("192.168.1.2", "AA:BB:CC:DD:EE:FF");
 */
 int set_rarp_entry(const char *ip_addr, const char *mac_addr) {
 
@@ -1114,7 +1116,7 @@ int set_rarp_entry(const char *ip_addr, const char *mac_addr) {
         return ERR_IOCTL;
     }
 
-    printf("Successfully set RARP entry for IP: %s with MAC: %s\n", ip_addr, mac_addr);
+    //printf("Successfully set RARP entry for IP: %s with MAC: %s\n", ip_addr, mac_addr);
 
     close(sockfd);
     return 0;
