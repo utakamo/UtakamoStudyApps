@@ -215,6 +215,19 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		}
 	}
 
+	// delete_arp_entry Error Message
+	if (strcmp(method, "delete_arp_entry") == 0) {
+		switch (result) {
+			case ERR_IOCTL:
+				blobmsg_add_string(blob, "Error", "Target ip address is not found (SIOCDARP).");
+				return;
+
+			default:
+				blobmsg_add_string(blob, "Error", "Unknown");
+				return;
+		}
+	}
+
 	// set_arp_entry Error Message
 	if (strcmp(method, "set_arp_entry") == 0) {
 		switch (result) {
@@ -358,6 +371,10 @@ static const struct blobmsg_policy get_mtu_method_policy[] = {
 
 static const struct blobmsg_policy get_mac_addr_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
+};
+
+static const struct blobmsg_policy delete_arp_entry_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="ipaddr", .type=BLOBMSG_TYPE_STRING },
 };
 
 static const struct blobmsg_policy set_arp_entry_method_policy[] = {
@@ -997,6 +1014,49 @@ static int get_mac_addr_method(struct ubus_context *ctx, struct ubus_object *obj
 	return 0;
 }
 
+// usage:
+// root@OpenWrt:~# ubus call luci-app-sample03 delete_arp_entry '{"ipaddr":"192.168.1.1"}'
+static int delete_arp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+	blobmsg_parse(delete_arp_entry_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+	if (!tb[UBUS_METHOD_ARGUMENT_1]){
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	const char *ip_addr = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_2]);
+
+	blob_buf_init(&blob, 0);
+
+	if (strlen(ip_addr) > INET_ADDRSTRLEN) {
+		blobmsg_add_string(&blob, "Error", "Target ip address is too long.");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	int result = delete_arp_entry(ip_addr);
+	blob_buf_init(&blob, 0);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		char message[256];
+		snprintf(message, sizeof(message), "Delete the ARP entry for %s", ip_addr);
+		blobmsg_add_string(&blob, "Success", message);
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+	return 0;
+}
+
+// usage:
+// root@OpenWrt:~# ubus call luci-app-sample03 set_arp_entry '{"ifname":"eth0", "macaddr":"AA:BB:CC:DD:EE:FF", "ipaddr":"192.168.1.1"}'
 static int set_arp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -1149,7 +1209,7 @@ static int delete_rarp_entry_method(struct ubus_context *ctx, struct ubus_object
 	} else {
 		char message[256];
 		snprintf(message, sizeof(message), "Delete the RARP entry for %s", ip_addr);
-		blobmsg_add_string(&blob, "Success", "Delete the RARP entry for");
+		blobmsg_add_string(&blob, "Success", message);
 	}
 
 	return 0;
@@ -1530,6 +1590,10 @@ const struct ubus_method ubus_sample_methods[] =
 
 #ifdef SUPPORT_GET_MAC_ADDR
 	UBUS_METHOD("get_mac_addr", get_mac_addr_method, get_mac_addr_method_policy),
+#endif
+
+#ifdef SUPPORT_DELETE_ARP_ENTRY
+	UBUS_METHOD("delete_arp_entry", delete_arp_entry_method, delete_arp_entry_method_policy),
 #endif
 
 #ifdef SUPPORT_SET_ARP_ENTRY

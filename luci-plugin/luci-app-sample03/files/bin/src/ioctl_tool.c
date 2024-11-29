@@ -787,10 +787,10 @@ int set_mac_addr(const char *ifname, const char *new_mac_addr) {
 }
 
 /*
+* Delete the ARP entry for the specified IP address.
 *
-*
-*
-*
+* usage:
+* delete_arp_entry("192.168.1.2");
 */
 int delete_arp_entry(const char *ip_addr) {
 
