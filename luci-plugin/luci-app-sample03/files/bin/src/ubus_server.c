@@ -1237,7 +1237,7 @@ static int set_if_map_method(struct ubus_context *ctx, struct ubus_object *obj,
 
 	blob_buf_init(&blob, 0);
 
-	int result = set_if_map(ifname, &map);
+	int result = set_if_map(ifname, map);
 
 	if (result != 0) {
 		blobmsg_error(&blob, result, method);

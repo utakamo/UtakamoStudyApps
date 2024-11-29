@@ -1166,7 +1166,7 @@ int get_if_map(const char *ifname, map_info *info) {
 *
 *
 */
-int set_if_map(const char *ifname, struct ifmap *new_map) {
+int set_if_map(const char *ifname, struct ifmap map) {
 
     int sockfd;
     struct ifreq ifr;
@@ -1178,7 +1178,7 @@ int set_if_map(const char *ifname, struct ifmap *new_map) {
 
     strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
 
-    memcpy(&ifr.ifr_map, new_map, sizeof(struct ifmap));
+    memcpy(&ifr.ifr_map, &map, sizeof(struct ifmap));
 
     if (ioctl(sockfd, SIOCSIFMAP, &ifr) < 0) {
         close(sockfd);
