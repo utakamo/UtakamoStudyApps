@@ -977,10 +977,11 @@ int set_arp_entry(const char *ifname, const char *ip_addr, const char *mac_addr)
 
 #ifdef SUPPORT_DELETE_RARP_ENTRY
 /*
+* Delete the RARP entry for the specified IP address.
+* Note: Legacy
 *
-*
-*
-*
+* usage:
+* delete_rarp_entry("192.168.1.2");
 */
 int delete_rarp_entry(const char *ip_addr) {
 
@@ -1006,8 +1007,6 @@ int delete_rarp_entry(const char *ip_addr) {
         close(sockfd);
         return ERR_IOCTL;
     }
-
-    printf("Successfully deleted RARP entry for IP: %s\n", ip_addr);
 
     close(sockfd);
     return 0;

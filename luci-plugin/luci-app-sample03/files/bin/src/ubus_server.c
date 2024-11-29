@@ -370,6 +370,10 @@ static const struct blobmsg_policy get_arp_entry_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="neighbor ip address", .type=BLOBMSG_TYPE_STRING },
 };
 
+static const struct blobmsg_policy delete_rarp_entry_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="ip address", .type=BLOBMSG_TYPE_STRING },
+};
+
 static const struct blobmsg_policy set_rarp_entry_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="ip address", .type=BLOBMSG_TYPE_STRING },
 	[UBUS_METHOD_ARGUMENT_2] = { .name="neighbor mac address", .type=BLOBMSG_TYPE_STRING },
@@ -1112,7 +1116,46 @@ static int get_arp_entry_method(struct ubus_context *ctx, struct ubus_object *ob
 	return 0;
 }
 
-// usasge:
+// usage:
+// root@OpenWrt:~# ubus call luci-app-sample03 delete_rarp_entry '{"ip address":""192.168.1.2}'
+static int delete_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+	blobmsg_parse(delete_rarp_entry_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+	if (!tb[UBUS_METHOD_ARGUMENT_1]){
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	const char *ip_addr = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+
+	blob_buf_init(&blob, 0);
+
+	if (strlen(ip_addr) > INET_ADDRSTRLEN) {
+		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	int result = delete_rarp_entry(ip_addr);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		char message[256];
+		snprintf(message, sizeof(message), "Delete the RARP entry for %s", ip_addr);
+		blobmsg_add_string(&blob, "Success", "Delete the RARP entry for");
+	}
+
+	return 0;
+}
+
+// usage:
 // root@OpenWrt:~# ubus call luci-app-sample03 get_rarp_entry '{"neighbor ip address":"192.168.1.1"}'
 static int set_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
@@ -1133,7 +1176,7 @@ static int set_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *o
 
 	blob_buf_init(&blob, 0);
 
-	if (strlen(ip_addr) > MAC_ADDRESS_LENGTH) {
+	if (strlen(ip_addr) > INET_ADDRSTRLEN) {
 		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
 		ubus_send_reply(ctx, req, blob.head);
 		return -1;
@@ -1495,6 +1538,10 @@ const struct ubus_method ubus_sample_methods[] =
 
 #ifdef SUPPORT_GET_ARP_ENTRY
 	UBUS_METHOD("get_arp_entry", get_arp_entry_method, get_arp_entry_method_policy),
+#endif
+
+#ifdef SUPPORT_DELETE_RARP_ENTRY
+	UBUS_METHOD("delete_rarp_entry", delete_rarp_entry_method, delete_rarp_entry_method_policy),
 #endif
 
 #ifdef SUPPORT_SET_RARP_ENTRY
