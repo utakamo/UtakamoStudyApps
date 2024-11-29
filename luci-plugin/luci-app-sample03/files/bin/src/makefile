@@ -13,10 +13,13 @@ OBJ = $(patsubst %.c, %.o, $(SRC))
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS) $(LDFLAGS)
 
+luci-app-sample03: $(OBJ)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
 datacheck: $(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 .PHONY: clean
 
 clean:
-	rm -f ubus-sample03 *.o datacheck
+	rm -f luci-app-sample03 *.o datacheck
