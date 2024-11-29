@@ -1,6 +1,5 @@
 #include "ioctl_tool.h"
 
-#ifdef SUPPORT_ADD_ROUTE
 /*
 * IOCTL: SIOCADDRT
 * This process is equivalent to the ip route add or route add command in Linux commands.
@@ -56,9 +55,7 @@ int add_route(const char *dest, const char *gateway, const char *netmask, const 
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_DELETE_ROUTE
 /*
 * This process is equivalent to the ip route delete or route delete command in Linux commands.
 * These commands are used to remove the target route from the kernel routing table.
@@ -106,9 +103,7 @@ int delete_route(const char *dest, const char *netmask, const char *ifname) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_HANDLE_RTMSG
 /*
 * A low-level ioctl request used to retrieve or inform the kernel of internal routing information.
 * However, unlike normal network configuration, this request is rarely used. 
@@ -142,9 +137,7 @@ int handle_rtmsg(char *msg, size_t msg_len) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_IFNAME_FROM_IDX
 /*
 * Get its name from the interface number.
 * 
@@ -177,9 +170,7 @@ int get_ifname_from_idx(int if_idx, char *ifname, size_t name_len) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_SET_IF_LINK
 /*
 * Change the “link” setting for the interface.
 * This function is used internally to control the behavior associated with a particular network device (e.g., virtual device).
@@ -214,9 +205,7 @@ int set_if_link(const char *ifname, int link_idx) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_LIST_IF
 /*
 * Get a list of network interfaces.
 *
@@ -270,9 +259,7 @@ int list_if(if_list *list, int max_if_num) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_IF_FLAGS
 /*
 * Get network interface flags.
 *
@@ -321,9 +308,7 @@ int get_if_flags(const char *ifname, flag_info *info) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_SET_IF_FLAGS
 /*
 * Set network interface flags.
 * 
@@ -356,9 +341,7 @@ int set_if_flags(const char *ifname, short flags_to_set, short flags_to_clear) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_IF_IPV4
 /*
 * Get the IPv4 address of an interface.
 *
@@ -394,9 +377,7 @@ int get_if_ipv4(const char *ifname, char *ipv4_addr, size_t addr_len) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_SET_IF_IPV4
 /*
 * Set IPv4 address on the target interface.
 *
@@ -435,9 +416,7 @@ int set_if_ipv4(const char *ifname, const char *ip_address) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_DEST_ADDR
 /*
 * Get the destination address (IPv4) of an interface
 *
@@ -473,9 +452,7 @@ int get_dest_addr(const char *ifname, char *dest_addr, size_t addr_len) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_SET_DEST_ADDR
 /*
 *
 *
@@ -514,9 +491,7 @@ int set_dest_addr(const char *ifname, const char *dest_addr) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_BCAST_ADDR
 /*
 * Get the broadcast address (IPv4) of an interface
 * 
@@ -553,9 +528,7 @@ int get_bcast_addr(const char *ifname, char *bcast_addr, size_t addr_len) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_SET_BCAST_ADDR
 /*
 *
 *
@@ -595,9 +568,7 @@ int set_bcast_addr(const char *ifname, const char *bcast_addr) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_NETMASK
 /*
 *
 *
@@ -632,9 +603,7 @@ int get_netmask(const char *ifname) {
 
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_SET_NETMASK
 /*
 *
 *
@@ -674,9 +643,7 @@ int set_netmask(const char *ifname, const char *netmask) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_MTU
 /*
 * Get the mtu of target interface
 *
@@ -708,9 +675,7 @@ int get_mtu(const char *ifname, int *mtu) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_SET_MTU
 /*
 *
 *
@@ -743,9 +708,7 @@ int set_mtu(const char *ifname, int mtu) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_MAC_ADDR
 /*
 * Get the mac address of an interface.
 *
@@ -782,9 +745,7 @@ int get_mac_addr(const char *ifname, char *mac_addr, size_t addr_len) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_SET_MAC_ADDR
 /*
 *
 *
@@ -824,9 +785,7 @@ int set_mac_addr(const char *ifname, const char *new_mac_addr) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_DELETE_ARP_ENTRY
 /*
 *
 *
@@ -863,9 +822,7 @@ int delete_arp_entry(const char *ip_addr) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_ARP_ENTRY
 /*
 * Get the ARP entry corresponding to the IP address of the neighbor device.
 *
@@ -923,9 +880,7 @@ int get_arp_entry(const char *neigh_ip_addr, arp_entry_info *info) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_SET_ARP_ENTRY
 /*
 * Set new arp entry
 * 
@@ -973,9 +928,7 @@ int set_arp_entry(const char *ifname, const char *ip_addr, const char *mac_addr)
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_DELETE_RARP_ENTRY
 /*
 * Delete the RARP entry for the specified IP address.
 * Note: Legacy
@@ -1011,9 +964,7 @@ int delete_rarp_entry(const char *ip_addr) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_RARP_ENTRY
 /*
 * Get the corresponding IP address from the MAC address of the adjacent device.
 * Note: Legacy
@@ -1066,9 +1017,7 @@ int get_rarp_entry(const char *neigh_mac_addr, rarp_entry_info *info) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_SET_RARP_ENTRY
 /*
 * Set the mapping between IP addresses and the MAC addresses of adjacent devices.
 * Note: Legacy
@@ -1118,9 +1067,7 @@ int set_rarp_entry(const char *ip_addr, const char *mac_addr) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_IF_MAP
 /*
 * Get the address mapping information of the target interface.
 *
@@ -1157,9 +1104,7 @@ int get_if_map(const char *ifname, map_info *info) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_SET_IF_MAP
 /*
 * Set the address mapping information for the target interface.
 *
@@ -1195,9 +1140,7 @@ int set_if_map(const char *ifname, struct ifmap map) {
     close(sockfd);
     return 0;
 }
-#endif
 
-#ifdef SUPPORT_GET_TX_QUE_LEN
 /*
 * Get the information of the packet transmission queue of the target interface
 * 
@@ -1228,7 +1171,6 @@ int get_tx_que_len(const char *ifname, int *qlen) {
 
     return 0;
 }
-#endif
 
 /*
 int main() {
