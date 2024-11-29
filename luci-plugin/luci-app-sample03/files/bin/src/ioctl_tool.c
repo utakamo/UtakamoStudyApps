@@ -1162,9 +1162,17 @@ int get_if_map(const char *ifname, map_info *info) {
 
 #ifdef SUPPORT_SET_IF_MAP
 /*
+* Set the address mapping information for the target interface.
 *
-*
-*
+* usage:
+* struct ifmap map;
+* map.mem_start = 0x0;
+* map.mem_end   = 0x0;
+* map.base_addr = 0xc00
+* map.irq       = 10
+* map.dma       = 0
+* map.port      = 0
+* set_if_map("eth", map);
 */
 int set_if_map(const char *ifname, struct ifmap map) {
 
