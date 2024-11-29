@@ -4,7 +4,7 @@ PKG_NAME:=luci-app-sample03
 PKG_VERSION:=1.0
 PKG_RELEASE:=1
 
-SOURCE_DIR:=./files/bin/src
+SOURCE_DIR:=./files/src/bin
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)$(PKG_VERSION)-$(PKG_RELEASE)
 TARGET_LDFLAGS+=-luci -lubus -lubox
 
