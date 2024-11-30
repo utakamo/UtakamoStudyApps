@@ -1193,27 +1193,3 @@ int get_tx_que_len(const char *ifname, int *qlen) {
 
     return 0;
 }
-
-/*
-int main() {
-
-    //add_route("192.168.1.0", "192.168.1.1", "255.255.255.0", "eth0");
-    //delete_route("192.168.1.0", "255.255.255.0", "eth0");
-
-    //char message[1024];
-    //handle_rtmsg(message, sizeof(message));
-    //printf("%s\n", message);
-
-    //char ifname[256];
-    //get_ifname_from_idx(1, ifname, sizeof(ifname));
-    //printf("%s\n", ifname);
-
-    //set_if_link("eth0", 1);
-
-    //char if_list[1024];
-    //list_if(if_list, sizeof(if_list));
-
-    //get_if_flags("eth0");
-    //set_if_flags("eth", 0x01, 0x0);
-}
-*/
