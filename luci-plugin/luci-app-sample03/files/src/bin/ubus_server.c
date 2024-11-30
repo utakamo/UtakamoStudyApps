@@ -14,6 +14,7 @@
 #include <libubox/blobmsg_json.h>
 #include <libubox/blobmsg.h>
 #include "ioctl_tool.h"
+#include "netlink_tool.h"
 
 #define MAC_ADDRESS_LENGTH	17
 
@@ -424,6 +425,9 @@ static const struct blobmsg_policy set_if_flags_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_3] = { .name="flag to clear", .type=BLOBMSG_TYPE_STRING },
 };
 
+// netlink
+static const struct blobmsg_policy netlink_list_if_method_policy[] = {};
+
 /* ubus methods */
 static int add_route_method(struct ubus_context *, struct ubus_object *,
                         struct ubus_request_data *, const char *,
@@ -500,6 +504,11 @@ static int set_if_map_method(struct ubus_context *, struct ubus_object *,
 static int get_tx_que_len_method(struct ubus_context *, struct ubus_object *,
                         struct ubus_request_data *, const char *,
                         struct blob_attr *);
+
+//netlink
+static int netlink_list_if_method(struct ubus_context *, struct ubus_object *,
+			  struct ubus_request_data *, const char *,
+			  struct blob_attr *);
 
 void ubus_process(void);
 
@@ -1532,8 +1541,34 @@ static int set_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj
 	return 0;
 }
 
+static int netlink_list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+
+	const int max_if_num = 32;
+	netlink_if_list list[max_if_num];
+
+	int result = netlink_list_if(list, max_if_num);
+
+	blob_buf_init(&blob, 0);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		blobmsg_add_string(&blob, "routing infomation", "hello");
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+
+	return 0;
+}
+
 /* Ubus object methods */
-const struct ubus_method ubus_sample_methods[] =
+const struct ubus_method ubus_sample_netlink_methods[] = {
+	UBUS_METHOD("list_if", netlink_list_if_method, netlink_list_if_method_policy),
+};
+
+const struct ubus_method ubus_sample_ioctl_methods[] =
 {
 	/* UBUS_METHOD(method_name, method_call_function, method_policy) */
 #ifdef SUPPORT_ADD_ROUTE
@@ -1630,22 +1665,32 @@ const struct ubus_method ubus_sample_methods[] =
 };
 
 /* Ubus object type */
-struct ubus_object_type ubus_sample_obj_type = UBUS_OBJECT_TYPE("luci-app-sample03-uobj", ubus_sample_methods);
+struct ubus_object_type ubus_sample_ioctl_obj_type = UBUS_OBJECT_TYPE("luci-app-sample03-ioctl-uobj", ubus_sample_ioctl_methods);
+struct ubus_object_type ubus_sample_netlink_obj_type = UBUS_OBJECT_TYPE("luci-app-sample03-netlink-uobj", ubus_sample_netlink_methods);
 
 /* Ubus object */
-struct ubus_object ubus_sample_object=
+struct ubus_object ubus_ioctl_object=
 {
-	.name = "luci-app-sample03", //objpath
-	.type = &ubus_sample_obj_type,
-	.methods = ubus_sample_methods,
-	.n_methods = ARRAY_SIZE(ubus_sample_methods),
+	.name = "ioctl-tool", //objpath
+	.type = &ubus_sample_ioctl_obj_type,
+	.methods = ubus_sample_ioctl_methods,
+	.n_methods = ARRAY_SIZE(ubus_sample_ioctl_methods),
+};
+
+struct ubus_object ubus_netlink_object=
+{
+	.name = "netlink-tool", //objpath
+	.type = &ubus_sample_netlink_obj_type,
+	.methods = ubus_sample_netlink_methods,
+	.n_methods = ARRAY_SIZE(ubus_sample_netlink_methods),
 };
 
 void ubus_process(void) {
 	uloop_init();
 	struct ubus_context *ctx = ubus_connect(NULL);
 	ubus_add_uloop(ctx);
-	ubus_add_object(ctx, &ubus_sample_object);
+	ubus_add_object(ctx, &ubus_ioctl_object);
+	ubus_add_object(ctx, &ubus_netlink_object);
 	uloop_run();
 	uloop_done();
 	return;

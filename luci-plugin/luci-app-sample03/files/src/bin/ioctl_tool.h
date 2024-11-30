@@ -13,7 +13,7 @@
 #include <arpa/inet.h>
 #include <linux/if_ether.h>
 #include <linux/if_arp.h>
-
+#include "common.h"
 
 /********************************/
 /*      Routing operations      */
@@ -70,18 +70,6 @@
 #define SUPPORT_GET_IF_MAP              // SIOCGIFMAP
 #define SUPPORT_SET_IF_MAP              // SIOCSIFMAP
 #define SUPPORT_GET_TX_QUE_LEN          // SIOCGIFTXQLEN
-
-#define ERR_SOCKET          1
-#define ERR_INET_PTON       2
-#define ERR_INET_PTON_DST   3
-#define ERR_INET_PTON_GT    4
-#define ERR_INET_PTON_MASK  5
-#define ERR_IOCTL           6
-#define ERR_MAC_FORMAT      7
-
-#define MAX_INTERFACES      128
-
-#define MAX_IFNAME_LEN      256
 
 typedef struct if_list {
     char name[IFNAMSIZ];
