@@ -34,8 +34,8 @@
 /********************************/
 /*      Address operations      */
 /********************************/
-#define SUPPORT_GET_IF_IPV4        // SIOCGIFADDR
-#define SUPPORT_SET_IF_IPV4        // SIOCSIFADDR 
+#define SUPPORT_SET_IF_IPV4             // SIOCSIFADDR
+#define SUPPORT_GET_IF_IPV4             // SIOCGIFADDR
 #define SUPPORT_GET_DEST_ADDR           // SIOCGIFDSTADDR
 #define SUPPORT_SET_DEST_ADDR           // SIOCSIFDSTADDR
 #define SUPPORT_GET_BCAST_ADDR          // SIOCGIFBRDADDR
