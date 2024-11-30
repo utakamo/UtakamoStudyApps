@@ -510,8 +510,6 @@ static int netlink_list_if_method(struct ubus_context *, struct ubus_object *,
 			  struct ubus_request_data *, const char *,
 			  struct blob_attr *);
 
-void ubus_process(void);
-
 //Function equivalent to the uci get command.
 bool uci_get_option(char* str, char* value);
 
@@ -531,14 +529,6 @@ static void ubus_sample_setup_signals(void)
 	s.sa_handler = ubus_sample_handle_signal;
 	s.sa_flags = 0;
 	sigaction(SIGTERM, &s, NULL);
-}
-
-int main(int argc, char** argv)
-{
-	ubus_sample_setup_signals();
-	ubus_process();
-
-	return EXIT_SUCCESS;
 }
 
 /*************************/
@@ -1684,24 +1674,28 @@ const struct ubus_method ubus_sample_ioctl_methods[] =
 struct ubus_object_type ubus_sample_ioctl_obj_type = UBUS_OBJECT_TYPE("luci-app-sample03-ioctl-uobj", ubus_sample_ioctl_methods);
 struct ubus_object_type ubus_sample_netlink_obj_type = UBUS_OBJECT_TYPE("luci-app-sample03-netlink-uobj", ubus_sample_netlink_methods);
 
-/* Ubus object */
-struct ubus_object ubus_ioctl_object=
-{
-	.name = "ioctl-tool", //objpath
-	.type = &ubus_sample_ioctl_obj_type,
-	.methods = ubus_sample_ioctl_methods,
-	.n_methods = ARRAY_SIZE(ubus_sample_ioctl_methods),
-};
 
-struct ubus_object ubus_netlink_object=
+int main(int argc, char** argv)
 {
-	.name = "netlink-tool", //objpath
-	.type = &ubus_sample_netlink_obj_type,
-	.methods = ubus_sample_netlink_methods,
-	.n_methods = ARRAY_SIZE(ubus_sample_netlink_methods),
-};
+	ubus_sample_setup_signals();
 
-void ubus_process(void) {
+	/* Ubus object */
+	struct ubus_object ubus_ioctl_object=
+	{
+		.name = "ioctl-tool", //objpath
+		.type = &ubus_sample_ioctl_obj_type,
+		.methods = ubus_sample_ioctl_methods,
+		.n_methods = ARRAY_SIZE(ubus_sample_ioctl_methods),
+	};
+
+	struct ubus_object ubus_netlink_object=
+	{
+		.name = "netlink-tool", //objpath
+		.type = &ubus_sample_netlink_obj_type,
+		.methods = ubus_sample_netlink_methods,
+		.n_methods = ARRAY_SIZE(ubus_sample_netlink_methods),
+	};
+
 	uloop_init();
 	struct ubus_context *ctx = ubus_connect(NULL);
 	ubus_add_uloop(ctx);
@@ -1709,5 +1703,6 @@ void ubus_process(void) {
 	ubus_add_object(ctx, &ubus_netlink_object);
 	uloop_run();
 	uloop_done();
-	return;
+
+	return EXIT_SUCCESS;
 }
