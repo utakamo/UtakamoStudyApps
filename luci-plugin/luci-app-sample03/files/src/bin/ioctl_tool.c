@@ -57,6 +57,7 @@ int add_route(const char *dest, const char *gateway, const char *netmask, const 
 }
 
 /*
+* IOCTL: SIOCDELRT
 * This process is equivalent to the ip route delete or route delete command in Linux commands.
 * These commands are used to remove the target route from the kernel routing table.
 * The result of this function can be checked with the ip route show command.
@@ -105,6 +106,7 @@ int delete_route(const char *dest, const char *netmask, const char *ifname) {
 }
 
 /*
+* IOCTL: SIOCRTMSG
 * A low-level ioctl request used to retrieve or inform the kernel of internal routing information.
 * However, unlike normal network configuration, this request is rarely used. 
 * It is also ambiguous in use and meaning, and may involve kernel- or specific driver-dependent behavior.
@@ -139,6 +141,7 @@ int handle_rtmsg(char *msg, size_t msg_len) {
 }
 
 /*
+* IOCTL: SIOCGIFNAME
 * Get its name from the interface number.
 * 
 * usage:
@@ -172,6 +175,7 @@ int get_ifname_from_idx(int if_idx, char *ifname, size_t name_len) {
 }
 
 /*
+* IOCTL: SIOCSIFLINK
 * Change the “link” setting for the interface.
 * This function is used internally to control the behavior associated with a particular network device (e.g., virtual device).
 * To check the results of the link configuration, the following commands can be used
@@ -207,6 +211,7 @@ int set_if_link(const char *ifname, int link_idx) {
 }
 
 /*
+* IOCTL: SIOCGIFCONF
 * Get a list of network interfaces.
 *
 * usage:
@@ -261,6 +266,7 @@ int list_if(if_list *list, int max_if_num) {
 }
 
 /*
+* IOCTL: SIOCGIFFLAGS
 * Get network interface flags.
 *
 * usage:
@@ -310,6 +316,7 @@ int get_if_flags(const char *ifname, flag_info *info) {
 }
 
 /*
+* IOCTL: SIOCSIFFLAGS
 * Set network interface flags.
 * 
 * usage:
@@ -343,6 +350,7 @@ int set_if_flags(const char *ifname, short flags_to_set, short flags_to_clear) {
 }
 
 /*
+* IOCTL: SIOCGIFADDR
 * Get the IPv4 address of an interface.
 *
 * usage:
@@ -379,6 +387,7 @@ int get_if_ipv4(const char *ifname, char *ipv4_addr, size_t addr_len) {
 }
 
 /*
+* IOCTL: SIOCSIFADDR
 * Set IPv4 address on the target interface.
 *
 * usage:
@@ -418,6 +427,7 @@ int set_if_ipv4(const char *ifname, const char *ip_address) {
 }
 
 /*
+* IOCTL: SIOCGIFDSTADDR
 * Get the destination address (IPv4) of an interface
 *
 * usage:
@@ -454,7 +464,7 @@ int get_dest_addr(const char *ifname, char *dest_addr, size_t addr_len) {
 }
 
 /*
-*
+* IOCTL: SIOCSIFDSTADDR
 *
 *
 */
@@ -493,6 +503,7 @@ int set_dest_addr(const char *ifname, const char *dest_addr) {
 }
 
 /*
+* IOCTL: SIOCGIFBRDADDR
 * Get the broadcast address (IPv4) of an interface
 * 
 * usage:
@@ -530,7 +541,7 @@ int get_bcast_addr(const char *ifname, char *bcast_addr, size_t addr_len) {
 }
 
 /*
-*
+* IOCTL: SIOCSIFBRDADDR
 *
 *
 *
@@ -570,7 +581,7 @@ int set_bcast_addr(const char *ifname, const char *bcast_addr) {
 }
 
 /*
-*
+* IOCTL: SIOCGIFNETMASK
 *
 *
 *
@@ -605,7 +616,7 @@ int get_netmask(const char *ifname) {
 }
 
 /*
-*
+* IOCTL: SIOCSIFNETMASK
 *
 *
 *
@@ -645,6 +656,7 @@ int set_netmask(const char *ifname, const char *netmask) {
 }
 
 /*
+* IOCTL: SIOCGIFMTU
 * Get the mtu of target interface
 *
 * usage:
@@ -677,7 +689,7 @@ int get_mtu(const char *ifname, int *mtu) {
 }
 
 /*
-*
+* IOCTL: SIOCSIFMTU
 *
 *
 *
@@ -710,6 +722,7 @@ int set_mtu(const char *ifname, int mtu) {
 }
 
 /*
+* IOCTL: SIOCGIFHWADDR
 * Get the mac address of an interface.
 *
 * usage:
@@ -747,7 +760,7 @@ int get_mac_addr(const char *ifname, char *mac_addr, size_t addr_len) {
 }
 
 /*
-*
+* IOCTL: SIOCSIFHWADDR
 *
 *
 */
@@ -787,6 +800,7 @@ int set_mac_addr(const char *ifname, const char *new_mac_addr) {
 }
 
 /*
+* IOCTL: SIOCDARP
 * Delete the ARP entry for the specified IP address.
 *
 * usage:
@@ -824,6 +838,7 @@ int delete_arp_entry(const char *ip_addr) {
 }
 
 /*
+* IOCTL: SIOCGARP
 * Get the ARP entry corresponding to the IP address of the neighbor device.
 *
 * usage:
@@ -882,6 +897,7 @@ int get_arp_entry(const char *neigh_ip_addr, arp_entry_info *info) {
 }
 
 /*
+* IOCTL: SIOCSARP
 * Set new arp entry
 * 
 * usage:
@@ -930,6 +946,7 @@ int set_arp_entry(const char *ifname, const char *ip_addr, const char *mac_addr)
 }
 
 /*
+* IOCTL: SIOCDRARP
 * Delete the RARP entry for the specified IP address.
 * Note: Legacy
 *
@@ -966,6 +983,7 @@ int delete_rarp_entry(const char *ip_addr) {
 }
 
 /*
+* IOCTL: SIOCGRARP
 * Get the corresponding IP address from the MAC address of the adjacent device.
 * Note: Legacy
 *
@@ -1019,6 +1037,7 @@ int get_rarp_entry(const char *neigh_mac_addr, rarp_entry_info *info) {
 }
 
 /*
+* IOCTL: SIOCSRARP
 * Set the mapping between IP addresses and the MAC addresses of adjacent devices.
 * Note: Legacy
 *
@@ -1069,6 +1088,7 @@ int set_rarp_entry(const char *ip_addr, const char *mac_addr) {
 }
 
 /*
+* IOCTL: SIOCGIFMAP
 * Get the address mapping information of the target interface.
 *
 * usage:
@@ -1106,6 +1126,7 @@ int get_if_map(const char *ifname, map_info *info) {
 }
 
 /*
+* IOCTL: SIOCSIFMAP
 * Set the address mapping information for the target interface.
 *
 * usage:
@@ -1142,6 +1163,7 @@ int set_if_map(const char *ifname, struct ifmap map) {
 }
 
 /*
+* IOCTL: SIOCGIFTXQLEN
 * Get the information of the packet transmission queue of the target interface
 * 
 * usage:
