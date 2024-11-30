@@ -465,8 +465,10 @@ int get_dest_addr(const char *ifname, char *dest_addr, size_t addr_len) {
 
 /*
 * IOCTL: SIOCSIFDSTADDR
+* Set the destination ip address on the target interface.
 *
-*
+* usage:
+* set_dest_addr("eth0", "192.168.2.1");
 */
 int set_dest_addr(const char *ifname, const char *dest_addr) {
 
@@ -495,8 +497,6 @@ int set_dest_addr(const char *ifname, const char *dest_addr) {
         close(sockfd);
         return ERR_IOCTL;
     }
-
-    printf("Destination address %s set successfully on interface %s\n", dest_addr, ifname);
 
     close(sockfd);
     return 0;
