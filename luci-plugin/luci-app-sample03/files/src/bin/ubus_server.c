@@ -688,7 +688,7 @@ int set_if_link_method(struct ubus_context *ctx, struct ubus_object *obj,
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 list_if '{}'
+// root@OpenWrt:~# ubus call ioctl-tool list_if '{}'
 int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
 				struct ubus_request_data *req, const char *method,
 				struct blob_attr *msg) {
@@ -728,7 +728,7 @@ int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 get_if_flags '{"ifname":"eth0"}'
+// root@OpenWrt:~# ubus call ioctl-tool get_if_flags '{"ifname":"eth0"}'
 static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -775,7 +775,7 @@ static int get_if_flags_method(struct ubus_context *ctx, struct ubus_object *obj
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 set_if_ipv4 '{"ifname":"eth0", "ip address":"192.168.1.1"}'
+// root@OpenWrt:~# ubus call ioctl-tool set_if_ipv4 '{"ifname":"eth0", "ip address":"192.168.1.1"}'
 static int set_if_ipv4_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -826,7 +826,7 @@ static int set_if_ipv4_method(struct ubus_context *ctx, struct ubus_object *obj,
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 get_if_ipv4 '{"ifname":"eth0"}'
+// root@OpenWrt:~# ubus call ioctl-tool get_if_ipv4 '{"ifname":"eth0"}'
 static int get_if_ipv4_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -866,7 +866,7 @@ static int get_if_ipv4_method(struct ubus_context *ctx, struct ubus_object *obj,
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 get_dest_addr '{"ifname":"eth0"}'
+// root@OpenWrt:~# ubus call ioctl-tool get_dest_addr '{"ifname":"eth0"}'
 static int get_dest_addr_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -906,7 +906,7 @@ static int get_dest_addr_method(struct ubus_context *ctx, struct ubus_object *ob
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 get_bcast_addr '{"ifname":"eth0"}'
+// root@OpenWrt:~# ubus call ioctl-tool get_bcast_addr '{"ifname":"eth0"}'
 static int get_bcast_addr_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -946,7 +946,7 @@ static int get_bcast_addr_method(struct ubus_context *ctx, struct ubus_object *o
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 get_mtu '{"ifname":"eth0"}'
+// root@OpenWrt:~# ubus call ioctl-tool get_mtu '{"ifname":"eth0"}'
 static int get_mtu_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -985,7 +985,7 @@ static int get_mtu_method(struct ubus_context *ctx, struct ubus_object *obj,
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 get_mac_addr '{"ifname":"eth0"}'
+// root@OpenWrt:~# ubus call ioctl-tool get_mac_addr '{"ifname":"eth0"}'
 static int get_mac_addr_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -1024,7 +1024,7 @@ static int get_mac_addr_method(struct ubus_context *ctx, struct ubus_object *obj
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 delete_arp_entry '{"ipaddr":"192.168.1.1"}'
+// root@OpenWrt:~# ubus call ioctl-tool delete_arp_entry '{"ipaddr":"192.168.1.1"}'
 static int delete_arp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -1065,7 +1065,7 @@ static int delete_arp_entry_method(struct ubus_context *ctx, struct ubus_object 
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 set_arp_entry '{"ifname":"eth0", "macaddr":"AA:BB:CC:DD:EE:FF", "ipaddr":"192.168.1.1"}'
+// root@OpenWrt:~# ubus call ioctl-tool set_arp_entry '{"ifname":"eth0", "macaddr":"AA:BB:CC:DD:EE:FF", "ipaddr":"192.168.1.1"}'
 static int set_arp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -1136,7 +1136,7 @@ static int set_arp_entry_method(struct ubus_context *ctx, struct ubus_object *ob
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 get_arp_entry '{"ip address":"192.168.1.1"}'
+// root@OpenWrt:~# ubus call ioctl-tool get_arp_entry '{"ip address":"192.168.1.1"}'
 static int get_arp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -1186,7 +1186,7 @@ static int get_arp_entry_method(struct ubus_context *ctx, struct ubus_object *ob
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 delete_rarp_entry '{"ip address":""192.168.1.2}'
+// root@OpenWrt:~# ubus call ioctl-tool delete_rarp_entry '{"ip address":""192.168.1.2}'
 static int delete_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -1225,7 +1225,7 @@ static int delete_rarp_entry_method(struct ubus_context *ctx, struct ubus_object
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 get_rarp_entry '{"neighbor ip address":"192.168.1.1"}'
+// root@OpenWrt:~# ubus call ioctl-tool get_rarp_entry '{"neighbor ip address":"192.168.1.1"}'
 static int set_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -1282,7 +1282,7 @@ static int set_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *o
 }
 
 // usasge:
-// root@OpenWrt:~# ubus call luci-app-sample03 get_rarp_entry '{"neighbor ip address":"192.168.1.1"}'
+// root@OpenWrt:~# ubus call ioctl-tool get_rarp_entry '{"neighbor ip address":"192.168.1.1"}'
 static int get_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -1332,7 +1332,7 @@ static int get_rarp_entry_method(struct ubus_context *ctx, struct ubus_object *o
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 get_if_map '{"ifname":"eth0"}'
+// root@OpenWrt:~# ubus call ioctl-tool get_if_map '{"ifname":"eth0"}'
 static int get_if_map_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
@@ -1441,7 +1441,7 @@ static int set_if_map_method(struct ubus_context *ctx, struct ubus_object *obj,
 }
 
 // usage:
-// root@OpenWrt:~# ubus call luci-app-sample03 get_tx_que_len '{"ifname":"eth0"}'
+// root@OpenWrt:~# ubus call ioctl-tool get_tx_que_len '{"ifname":"eth0"}'
 static int get_tx_que_len_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct ubus_request_data *req, const char *method,
                         struct blob_attr *msg) {
