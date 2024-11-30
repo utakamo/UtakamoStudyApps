@@ -619,7 +619,7 @@ int handle_rtmsg_method(struct ubus_context *ctx, struct ubus_object *obj,
 	if (result != 0) {
 		blobmsg_error(&blob, result, method);
 	} else {
-		blobmsg_add_string(&blob, "routing infomation", "hello");
+		blobmsg_add_string(&blob, "routing infomation", message);
 	}
 
 	ubus_send_reply(ctx, req, blob.head);
@@ -696,6 +696,7 @@ int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
 	const int max_if_num = 32;
 
 	if_list list[max_if_num];
+	memset(list, '\0', sizeof(list));
 
 	int result = list_if(list, max_if_num);
 
@@ -714,8 +715,8 @@ int list_if_method(struct ubus_context *ctx, struct ubus_object *obj,
 				break;
 			}
 
-			char if_item_name[32] = {'\0'};
-			snprintf(if_item_name, sizeof(if_item_name), "%s%d", "if_item_", (i + 1));
+			char if_item_name[64] = {'\0'};
+			snprintf(if_item_name, sizeof(if_item_name), "if_item_%d", (i + 1));
 			s = blobmsg_open_table(&blob, if_item_name);
 			blobmsg_add_string(&blob, "interface", list[i].name);
 			blobmsg_add_string(&blob, "ipv4 address", list[i].ipv4_addr);
@@ -1547,6 +1548,7 @@ static int netlink_list_if_method(struct ubus_context *ctx, struct ubus_object *
 
 	const int max_if_num = 32;
 	netlink_if_list list[max_if_num];
+	memset(list, '\0', sizeof(list));
 
 	int result = netlink_list_if(list, max_if_num);
 
@@ -1555,7 +1557,21 @@ static int netlink_list_if_method(struct ubus_context *ctx, struct ubus_object *
 	if (result != 0) {
 		blobmsg_error(&blob, result, method);
 	} else {
-		blobmsg_add_string(&blob, "routing infomation", "hello");
+		void *s;
+		int i;
+		for (i = 0; i < max_if_num; i++) {
+
+			if (strlen(list[i].ifname) == 0) {
+				break;
+			}
+
+			char if_item_name[64] = {'\0'};
+			snprintf(if_item_name, sizeof(if_item_name), "if_item_%d", (i + 1));
+			s = blobmsg_open_table(&blob, if_item_name);
+			blobmsg_add_u32(&blob, "index", list[i].index);
+			blobmsg_add_string(&blob, "ifname", list[i].ifname);
+			blobmsg_close_table(&blob, s);
+		}
 	}
 
 	ubus_send_reply(ctx, req, blob.head);

@@ -11,6 +11,7 @@ void parse_rtattr(struct rtattr *tb[], int max, struct rtattr *rta, int len) {
 }
 
 int netlink_list_if(netlink_if_list *list, int max_if_num) {
+
     int sock_fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
     if (sock_fd < 0) {
         return ERR_SOCKET;
@@ -71,6 +72,7 @@ int netlink_list_if(netlink_if_list *list, int max_if_num) {
         if (tb[IFLA_IFNAME]) {
             list[item].index = ifi->ifi_index;
             snprintf(list[item].ifname, IFNAMSIZ, "%s", (char *)RTA_DATA(tb[IFLA_IFNAME]));
+            item++;
         }
     }
 
