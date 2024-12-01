@@ -691,9 +691,10 @@ int get_mtu(const char *ifname, int *mtu) {
 
 /*
 * IOCTL: SIOCSIFMTU
+* Set the mtu on the target interface.
 *
-*
-*
+* usage:
+* set_mtu("eth0", 1500);
 */
 int set_mtu(const char *ifname, int mtu) {
 
@@ -715,8 +716,6 @@ int set_mtu(const char *ifname, int mtu) {
         close(sockfd);
         return ERR_IOCTL;
     }
-
-    printf("MTU set to %d for interface %s\n", mtu, ifname);
 
     close(sockfd);
     return 0;

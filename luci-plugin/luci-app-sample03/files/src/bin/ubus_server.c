@@ -229,6 +229,19 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		}
 	}
 
+	// set_mtu Error Message
+	if (strcmp(method, "set_mtu") == 0) {
+		switch (result) {
+			case ERR_IOCTL:
+				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCSIFMTU).");
+				return;
+
+			default:
+				blobmsg_add_string(blob, "Error", "Unknown");
+				return;
+		}
+	}
+
 	// get_mac_addr Error Message
 	if (strcmp(method, "get_mac_addr") == 0) {
 		switch (result) {
@@ -410,6 +423,11 @@ static const struct blobmsg_policy get_mtu_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
 };
 
+static const struct blobmsg_policy set_mtu_method_policy[] = {
+	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_2] = { .name="mtu", .type=BLOBMSG_TYPE_INT32 },
+};
+
 static const struct blobmsg_policy get_mac_addr_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
 };
@@ -514,6 +532,10 @@ static int get_dest_addr_method(struct ubus_context *, struct ubus_object *,
                         struct blob_attr *);
 
 static int get_mtu_method(struct ubus_context *, struct ubus_object *,
+                        struct ubus_request_data *, const char *,
+                        struct blob_attr *);
+
+static int set_mtu_method(struct ubus_context *, struct ubus_object *,
                         struct ubus_request_data *, const char *,
                         struct blob_attr *);
 
@@ -1125,7 +1147,7 @@ static int get_mtu_method(struct ubus_context *ctx, struct ubus_object *obj,
                         struct blob_attr *msg) {
 	
 	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
-	blobmsg_parse(get_bcast_addr_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+	blobmsg_parse(get_mtu_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
 	if (!tb[UBUS_METHOD_ARGUMENT_1]){
 		blob_buf_init(&blob, 0);
@@ -1151,6 +1173,51 @@ static int get_mtu_method(struct ubus_context *ctx, struct ubus_object *obj,
 		blobmsg_error(&blob, result, method);
 	} else {
 		blobmsg_add_u32(&blob, "mtu", mtu);
+	}
+
+	ubus_send_reply(ctx, req, blob.head);
+	return 0;
+}
+
+// usage:
+// root@OpenWrt:~# ubus call ioctl-tool set_mtu '{"ifname":"eth0", "mtu":1500}'
+static int set_mtu_method(struct ubus_context *ctx, struct ubus_object *obj,
+                        struct ubus_request_data *req, const char *method,
+                        struct blob_attr *msg) {
+	
+	struct blob_attr *tb[UBUS_METHOD_ARGUMENT_MAX];
+	blobmsg_parse(set_mtu_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
+
+	if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]){
+		blob_buf_init(&blob, 0);
+		blobmsg_add_string(&blob, "Error", "Mismatch Key");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+	const int mtu = blobmsg_get_u32(tb[UBUS_METHOD_ARGUMENT_2]);
+
+	blob_buf_init(&blob, 0);
+
+	if (strlen(ifname) > IFNAMSIZ) {
+		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		ubus_send_reply(ctx, req, blob.head);
+		return -1;
+	}
+
+	int result = set_mtu(ifname, mtu);
+
+	if (result != 0) {
+		blobmsg_error(&blob, result, method);
+	} else {
+		int mtu;
+		int result = get_mtu(ifname, &mtu);
+		if (result != 0) {
+			blobmsg_error(&blob, result, "get_mtu");
+		} else {
+			blobmsg_add_u32(&blob, "mtu", mtu);
+		}
 	}
 
 	ubus_send_reply(ctx, req, blob.head);
@@ -1821,6 +1888,10 @@ const struct ubus_method ubus_sample_ioctl_methods[] =
 
 #ifdef SUPPORT_GET_MTU
 	UBUS_METHOD("get_mtu", get_mtu_method, get_mtu_method_policy),
+#endif
+
+#ifdef SUPPORT_GET_MTU
+	UBUS_METHOD("set_mtu", set_mtu_method, set_mtu_method_policy),
 #endif
 
 #ifdef SUPPORT_GET_MAC_ADDR
