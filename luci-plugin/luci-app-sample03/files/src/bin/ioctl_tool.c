@@ -617,9 +617,10 @@ int get_netmask(const char *ifname, char* netmask, size_t netmask_len) {
 
 /*
 * IOCTL: SIOCSIFNETMASK
+* Set the subnet mask on the target interface.
 *
-*
-*
+* usage:
+* set_netmask("eth0", "255.255.255.0");
 */
 int set_netmask(const char *ifname, const char *netmask) {
 
