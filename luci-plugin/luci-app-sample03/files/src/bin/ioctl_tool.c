@@ -582,11 +582,12 @@ int set_bcast_addr(const char *ifname, const char *bcast_addr) {
 
 /*
 * IOCTL: SIOCGIFNETMASK
+* Get the subnet mask of the target interface.
 *
-*
-*
+* usage:
+* get_netmask("eth0");
 */
-int get_netmask(const char *ifname) {
+int get_netmask(const char *ifname, char* netmask, size_t netmask_len) {
 
     int sockfd;
     struct ifreq ifr;
@@ -607,8 +608,7 @@ int get_netmask(const char *ifname) {
     }
 
     netmask_addr = (struct sockaddr_in *)&ifr.ifr_netmask;
-    printf("Netmask for interface %s: %s\n",
-           ifname, inet_ntoa(netmask_addr->sin_addr));
+    snprintf(netmask, netmask_len, "%s", inet_ntoa(netmask_addr->sin_addr));
 
     close(sockfd);
 

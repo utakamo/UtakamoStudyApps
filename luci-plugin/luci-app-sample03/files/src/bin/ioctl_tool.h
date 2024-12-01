@@ -143,6 +143,8 @@ int set_if_ipv4(const char *, const char *);
 int get_dest_addr(const char *, char *, size_t);
 int set_dest_addr(const char *, const char *);
 int get_bcast_addr(const char *, char *, size_t);
+int get_netmask(const char *, char *, size_t);
+int set_netmask(const char *, const char *);
 
 // Other interface attribute operations
 int get_mtu(const char *, int *);
