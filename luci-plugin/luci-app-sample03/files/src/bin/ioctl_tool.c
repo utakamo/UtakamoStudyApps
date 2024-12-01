@@ -829,8 +829,6 @@ int delete_arp_entry(const char *ip_addr) {
         return ERR_IOCTL;
     }
 
-    printf("ARP entry for %s has been deleted successfully.\n", ip_addr);
-
     close(sockfd);
     return 0;
 }
