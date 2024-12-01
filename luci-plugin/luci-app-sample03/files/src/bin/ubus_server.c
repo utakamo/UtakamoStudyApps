@@ -66,10 +66,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Failed to add routing table (SIOCADDRT).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
 
@@ -78,10 +74,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		switch (result) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Failed to delete routing table (SIOCDELRT).");
-				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
 				return;
 		}
 	}
@@ -92,10 +84,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Failed to retrieve routing infomation (SIOCRTMSG).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
 
@@ -104,10 +92,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		switch (result) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Failed to retrieve interface name (SIOCGIFNAME).");
-				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
 				return;
 		}
 	}
@@ -118,10 +102,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Failed to retrieve interface list (SIOCGIFCONF).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
 
@@ -130,10 +110,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		switch (result) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Failed to retrieve interface flag (SIOCGIFFLAGS).");
-				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
 				return;
 		}
 	}
@@ -144,10 +120,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCSIFADDR).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
 
@@ -156,10 +128,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		switch (result) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCGIFADDR).");
-				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
 				return;
 		}
 	}
@@ -170,10 +138,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCGIFDSTADDR).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
 
@@ -182,10 +146,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		switch (result) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCSIFDSTADDR).");
-				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
 				return;
 		}
 	}
@@ -196,10 +156,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCGIFBRDADDR).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
 
@@ -208,10 +164,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		switch (result) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCGIFNETMASK).");
-				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
 				return;
 		}
 	}
@@ -222,10 +174,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCGIFMTU).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
 
@@ -234,10 +182,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		switch (result) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCSIFMTU).");
-				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
 				return;
 		}
 	}
@@ -248,10 +192,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCGIFHWADDR).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
 
@@ -260,10 +200,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		switch (result) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target ip address is not found (SIOCDARP).");
-				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
 				return;
 		}
 	}
@@ -274,10 +210,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target ip address is not found (SIOCSARP).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
 
@@ -286,10 +218,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		switch (result) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target ip address is not found (SIOCGARP).");
-				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
 				return;
 		}
 	}
@@ -300,10 +228,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target mac address is not found (SIOCGARP).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
 
@@ -312,10 +236,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 		switch (result) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCGIFMAP).");
-				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
 				return;
 		}
 	}
@@ -326,10 +246,6 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCGIFTXQLEN).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
 
@@ -339,12 +255,10 @@ void blobmsg_error(struct blob_buf *blob, int result, const char *method) {
 			case ERR_IOCTL:
 				blobmsg_add_string(blob, "Error", "Target interface is not found (SIOCSIFFLAGS).");
 				return;
-
-			default:
-				blobmsg_add_string(blob, "Error", "Unknown");
-				return;
 		}
 	}
+
+	blobmsg_add_string(blob, "Error", "Unknown");
 }
 
 /* Ubus method policy */
