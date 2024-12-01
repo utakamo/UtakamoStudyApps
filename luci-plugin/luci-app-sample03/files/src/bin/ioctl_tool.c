@@ -542,9 +542,10 @@ int get_bcast_addr(const char *ifname, char *bcast_addr, size_t addr_len) {
 
 /*
 * IOCTL: SIOCSIFBRDADDR
+* Set the broadcast address on the target interface.
 *
-*
-*
+* usage:
+* set_bcast_addr("eth0", "255.255.255.0")
 */
 int set_bcast_addr(const char *ifname, const char *bcast_addr) {
 
@@ -573,8 +574,6 @@ int set_bcast_addr(const char *ifname, const char *bcast_addr) {
         close(sockfd);
         return ERR_IOCTL;
     }
-
-    printf("Broadcast address %s set successfully on interface %s\n", bcast_addr, ifname);
 
     close(sockfd);
     return 0;
@@ -761,18 +760,17 @@ int get_mac_addr(const char *ifname, char *mac_addr, size_t addr_len) {
 
 /*
 * IOCTL: SIOCSIFHWADDR
-*
+* 
 *
 */
-int set_mac_addr(const char *ifname, const char *new_mac_addr) {
+int set_mac_addr(const char *ifname, const char *macaddr) {
 
     int sockfd;
     struct ifreq ifr;
     unsigned char mac[6];
 
-    if (sscanf(new_mac_addr, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+    if (sscanf(macaddr, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
                &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) != 6) {
-        fprintf(stderr, "Invalid MAC address format: %s\n", new_mac_addr);
         return ERR_MAC_FORMAT;
     }
 
@@ -792,8 +790,6 @@ int set_mac_addr(const char *ifname, const char *new_mac_addr) {
         close(sockfd);
         return ERR_IOCTL;
     }
-
-    printf("MAC address set to %s for interface %s\n", new_mac_addr, ifname);
 
     close(sockfd);
     return 0;
@@ -871,7 +867,6 @@ int get_arp_entry(const char *neigh_ip_addr, arp_entry_info *info) {
     }
 
     unsigned char *mac = (unsigned char *)req.arp_ha.sa_data;
-    //snprintf(info->ip_addr, INET_ADDRSTRLEN, "%s", ip_addr);
     snprintf(info->mac_addr, 64, "%02x:%02x:%02x:%02x:%02x:%02x",
            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 

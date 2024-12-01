@@ -39,6 +39,7 @@
 #define SUPPORT_GET_DEST_ADDR           // SIOCGIFDSTADDR
 #define SUPPORT_SET_DEST_ADDR           // SIOCSIFDSTADDR
 #define SUPPORT_GET_BCAST_ADDR          // SIOCGIFBRDADDR
+#define SUPPORT_SET_BCAST_ADDR          // SIOCGIFBRDADDR
 #define SUPPORT_GET_NETMASK             // SIOCGIFNETMASK
 #define SUPPORT_SET_NETMASK             // SIOCSIFNETMASK
 
@@ -143,6 +144,7 @@ int set_if_ipv4(const char *, const char *);
 int get_dest_addr(const char *, char *, size_t);
 int set_dest_addr(const char *, const char *);
 int get_bcast_addr(const char *, char *, size_t);
+int set_bcast_addr(const char *, const char *);
 int get_netmask(const char *, char *, size_t);
 int set_netmask(const char *, const char *);
 
