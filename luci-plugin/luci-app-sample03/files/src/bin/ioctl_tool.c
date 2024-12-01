@@ -760,8 +760,10 @@ int get_mac_addr(const char *ifname, char *mac_addr, size_t addr_len) {
 
 /*
 * IOCTL: SIOCSIFHWADDR
-* 
+* Set the mac address on the target interface.
 *
+* usage:
+* set_mac_addr("eth0", "AA:BB:CC:DD:EE:FF");
 */
 int set_mac_addr(const char *ifname, const char *macaddr) {
 
