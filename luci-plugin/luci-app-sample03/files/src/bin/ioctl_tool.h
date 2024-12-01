@@ -25,11 +25,11 @@
 /********************************************/
 /*      Network interface operations        */
 /********************************************/
-#define SUPPORT_GET_IFNAME_FROM_IDX      // SIOCGIFNAME
+#define SUPPORT_GET_IFNAME_FROM_IDX     // SIOCGIFNAME
 #define SUPPORT_SET_IF_LINK             // SIOCSIFLINK
 #define SUPPORT_LIST_IF                 // SIOCGIFCONF
 #define SUPPORT_GET_IF_FLAGS            // SIOCGIFFLAGS
-#define SUPPORT_SET_IF_FLAGS     // SIOCSIFFLAGS
+#define SUPPORT_SET_IF_FLAGS            // SIOCSIFFLAGS
 
 /********************************/
 /*      Address operations      */
