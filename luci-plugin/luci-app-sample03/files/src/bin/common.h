@@ -1,3 +1,16 @@
+/*
+ * Copyright (C) 2024 utakamo <contact@utakamo.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License version 2.1
+ * as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
 #define ERR_SOCKET          1
 #define ERR_INET_PTON       2
 #define ERR_INET_PTON_DST   3
