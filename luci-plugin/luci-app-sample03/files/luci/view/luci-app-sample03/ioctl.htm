@@ -1,0 +1,372 @@
+<%+header%>
+<h2><%:IOCTL Tool%></h2>
+
+<div class="cbi-section">
+	<h3>インタフェース一覧</h3>
+	<div class="cbi-section-descr">
+		ubus メソッド <code>ioctl-tool list_if</code> の結果を表示します。
+	</div>
+	<div class="cbi-value">
+		<button type="button" class="cbi-button cbi-button-action" onclick="loadInterfaces()">最新状態を取得</button>
+	</div>
+	<table class="table" id="iface-table">
+		<thead>
+			<tr>
+				<th>Interface</th>
+				<th>IPv4 Address</th>
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+</div>
+
+<div class="cbi-section">
+	<h3>インタフェース詳細</h3>
+	<div class="cbi-section-descr">
+		選択したインタフェースに対して複数の IOCTL 取得系メソッドを呼び出します。
+	</div>
+	<div class="cbi-value">
+		<label for="iface-select">Interface</label>
+		<select id="iface-select"></select>
+		<button type="button" class="cbi-button cbi-button-reload" onclick="inspectInterface()">詳細取得</button>
+	</div>
+	<pre id="iface-details" class="ubus-output">インタフェースを選択して「詳細取得」を押してください。</pre>
+</div>
+
+<div class="cbi-section">
+	<h3>IPv4 設定</h3>
+	<div class="cbi-section-descr">
+		IP アドレス / ネットマスク / ブロードキャスト / 宛先アドレスを設定するメソッドを呼び出します。
+	</div>
+	<datalist id="iface-datalist"></datalist>
+	<div class="cbi-value">
+		<label>Interface</label>
+		<input id="ip-ifname" list="iface-datalist" placeholder="eth0">
+		<label>IPv4</label>
+		<input id="ip-address" placeholder="192.168.1.10">
+		<button type="button" class="cbi-button cbi-button-apply" onclick="applyIPv4()">set_if_ipv4</button>
+	</div>
+	<div class="cbi-value">
+		<label>Interface</label>
+		<input id="netmask-ifname" list="iface-datalist">
+		<label>Netmask</label>
+		<input id="netmask-value" placeholder="255.255.255.0">
+		<button type="button" class="cbi-button cbi-button-apply" onclick="applyNetmask()">set_netmask</button>
+	</div>
+	<div class="cbi-value">
+		<label>Interface</label>
+		<input id="bcast-ifname" list="iface-datalist">
+		<label>Broadcast</label>
+		<input id="bcast-value" placeholder="192.168.1.255">
+		<button type="button" class="cbi-button cbi-button-apply" onclick="applyBroadcast()">set_bcast_addr</button>
+	</div>
+	<div class="cbi-value">
+		<label>Interface</label>
+		<input id="dest-ifname" list="iface-datalist">
+		<label>Destination</label>
+		<input id="dest-value" placeholder="192.168.1.1">
+		<button type="button" class="cbi-button cbi-button-apply" onclick="applyDestination()">set_dest_addr</button>
+	</div>
+</div>
+
+<div class="cbi-section">
+	<h3>MTU / フラグ設定</h3>
+	<div class="cbi-section-descr">
+		MTU の変更および IF フラグの設定・解除を行います。フラグは 16 進数で入力してください（例: 0x1）。
+	</div>
+	<div class="cbi-value">
+		<label>Interface</label>
+		<input id="mtu-ifname" list="iface-datalist">
+		<label>MTU</label>
+		<input id="mtu-value" type="number" min="576" step="1" placeholder="1500">
+		<button type="button" class="cbi-button cbi-button-apply" onclick="applyMtu()">set_mtu</button>
+	</div>
+	<div class="cbi-value">
+		<label>Interface</label>
+		<input id="flags-ifname" list="iface-datalist">
+		<label>Flag to set</label>
+		<input id="flags-set" placeholder="0x1">
+		<label>Flag to clear</label>
+		<input id="flags-clear" placeholder="0x0">
+		<button type="button" class="cbi-button cbi-button-apply" onclick="applyFlags()">set_if_flags</button>
+	</div>
+</div>
+
+<div id="ioctl-log" class="cbi-section">
+	<h3>ログ</h3>
+	<ul id="ioctl-log-list" class="ubus-log"></ul>
+</div>
+
+<style>
+	.ubus-output {
+		background: #f7f7f7;
+		padding: 12px;
+		border: 1px solid #ddd;
+		min-height: 120px;
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+	.ubus-log li {
+		margin-bottom: 6px;
+	}
+	.ubus-log .ok {
+		color: #008000;
+	}
+	.ubus-log .warn {
+		color: #aa7a00;
+	}
+	.ubus-log .err {
+		color: #cc0000;
+	}
+</style>
+
+<script type="text/javascript">
+(function() {
+	"use strict";
+
+	var apiUrl = '<%=luci.dispatcher.build_url("admin","status","custom-page","api","ioctl","call")%>';
+	var ifaceTableBody = document.getElementById("iface-table").querySelector("tbody");
+	var ifaceSelect = document.getElementById("iface-select");
+	var ifaceDetails = document.getElementById("iface-details");
+	var ifaceDatalist = document.getElementById("iface-datalist");
+	var logList = document.getElementById("ioctl-log-list");
+
+	function log(type, message, detail) {
+		var li = document.createElement("li");
+		li.className = type;
+		var text = "[" + (new Date()).toLocaleTimeString() + "] " + message;
+		if (detail !== undefined) {
+			try {
+				text += " :: " + JSON.stringify(detail);
+			} catch (e) {
+				/* ignore stringify errors */
+			}
+		}
+		li.textContent = text;
+		if (logList.firstChild) {
+			logList.insertBefore(li, logList.firstChild);
+		} else {
+			logList.appendChild(li);
+		}
+	}
+
+	function ubusCall(method, args, onSuccess, onFailure) {
+		XHR.post(apiUrl, JSON.stringify({ method: method, args: args || {} }), function(xhr, json) {
+			if (xhr.status >= 200 && xhr.status < 300 && json && json.ok) {
+				onSuccess(json.result || {});
+			} else {
+				var msg = (json && json.message) ? json.message : ("HTTP " + xhr.status);
+				if (onFailure) {
+					onFailure(msg);
+				}
+			}
+		}, {
+			headers: { "Content-Type": "application/json" }
+		});
+	}
+
+	function toArray(result) {
+		var items = [];
+		if (typeof result !== "object" || result === null) {
+			return items;
+		}
+		Object.keys(result).sort().forEach(function(key) {
+			var row = result[key];
+			if (row && typeof row === "object" && row.interface) {
+				items.push(row);
+			}
+		});
+		return items;
+	}
+
+	window.loadInterfaces = function() {
+		ubusCall("list_if", {}, function(result) {
+			var rows = toArray(result);
+			ifaceTableBody.innerHTML = "";
+			ifaceSelect.innerHTML = "";
+			ifaceDatalist.innerHTML = "";
+
+			rows.forEach(function(row) {
+				var tr = document.createElement("tr");
+				var tdIf = document.createElement("td");
+				tdIf.textContent = row.interface || "";
+				tr.appendChild(tdIf);
+
+				var tdIp = document.createElement("td");
+				tdIp.textContent = row["ipv4 address"] || "-";
+				tr.appendChild(tdIp);
+
+				ifaceTableBody.appendChild(tr);
+
+				var opt = document.createElement("option");
+				opt.value = row.interface;
+				opt.textContent = row.interface;
+				ifaceSelect.appendChild(opt);
+
+				var datalistOption = document.createElement("option");
+				datalistOption.value = row.interface;
+				ifaceDatalist.appendChild(datalistOption);
+			});
+
+			if (rows.length > 0) {
+				ifaceSelect.value = rows[0].interface;
+				ifaceDetails.textContent = "インタフェースを選択して「詳細取得」を押してください。";
+			} else {
+				ifaceDetails.textContent = "インタフェースが見つかりません。";
+			}
+
+			log("ok", "インタフェース一覧を更新しました。", rows);
+		}, function(err) {
+			log("err", "インタフェース一覧の取得に失敗しました。", { error: err });
+		});
+	};
+
+	window.inspectInterface = function() {
+		var ifname = ifaceSelect.value;
+		if (!ifname) {
+			log("warn", "インタフェースが選択されていません。");
+			return;
+		}
+
+		ifaceDetails.textContent = "取得中...";
+
+		var tasks = [
+			["get_if_flags", { ifname: ifname }],
+			["get_if_ipv4", { ifname: ifname }],
+			["get_dest_addr", { ifname: ifname }],
+			["get_bcast_addr", { ifname: ifname }],
+			["get_netmask", { ifname: ifname }],
+			["get_mtu", { ifname: ifname }],
+			["get_mac_addr", { ifname: ifname }],
+			["get_tx_que_len", { ifname: ifname }]
+		];
+
+		var remaining = tasks.length;
+		var collected = {};
+
+		function done() {
+			remaining--;
+			if (remaining <= 0) {
+				ifaceDetails.textContent = JSON.stringify(collected, null, 2);
+				log("ok", ifname + " の情報を取得しました。", collected);
+			}
+		}
+
+		tasks.forEach(function(item) {
+			var method = item[0];
+			var params = item[1];
+			ubusCall(method, params, function(data) {
+				collected[method] = data;
+				done();
+			}, function(err) {
+				collected[method] = { error: err };
+				log("err", method + " の取得に失敗しました。", { ifname: ifname, error: err });
+				done();
+			});
+		});
+	};
+
+	window.applyIPv4 = function() {
+		var ifname = document.getElementById("ip-ifname").value;
+		var ip = document.getElementById("ip-address").value;
+		if (!ifname || !ip) {
+			log("warn", "Interface と IPv4 を入力してください。");
+			return;
+		}
+
+		var payload = { ifname: ifname };
+		payload["ip address"] = ip;
+
+		ubusCall("set_if_ipv4", payload, function(result) {
+			log("ok", "set_if_ipv4 が完了しました。", result);
+		}, function(err) {
+			log("err", "set_if_ipv4 に失敗しました。", { error: err, payload: payload });
+		});
+	};
+
+	window.applyNetmask = function() {
+		var ifname = document.getElementById("netmask-ifname").value;
+		var netmask = document.getElementById("netmask-value").value;
+		if (!ifname || !netmask) {
+			log("warn", "Interface と Netmask を入力してください。");
+			return;
+		}
+
+		ubusCall("set_netmask", { ifname: ifname, netmask: netmask }, function(result) {
+			log("ok", "set_netmask が完了しました。", result);
+		}, function(err) {
+			log("err", "set_netmask に失敗しました。", { error: err, ifname: ifname });
+		});
+	};
+
+	window.applyBroadcast = function() {
+		var ifname = document.getElementById("bcast-ifname").value;
+		var bcast = document.getElementById("bcast-value").value;
+		if (!ifname || !bcast) {
+			log("warn", "Interface と Broadcast を入力してください。");
+			return;
+		}
+
+		ubusCall("set_bcast_addr", { ifname: ifname, bcastaddr: bcast }, function(result) {
+			log("ok", "set_bcast_addr が完了しました。", result);
+		}, function(err) {
+			log("err", "set_bcast_addr に失敗しました。", { error: err, ifname: ifname });
+		});
+	};
+
+	window.applyDestination = function() {
+		var ifname = document.getElementById("dest-ifname").value;
+		var dest = document.getElementById("dest-value").value;
+		if (!ifname || !dest) {
+			log("warn", "Interface と Destination を入力してください。");
+			return;
+		}
+
+		ubusCall("set_dest_addr", { ifname: ifname, ipaddr: dest }, function(result) {
+			log("ok", "set_dest_addr が完了しました。", result);
+		}, function(err) {
+			log("err", "set_dest_addr に失敗しました。", { error: err, ifname: ifname });
+		});
+	};
+
+	window.applyMtu = function() {
+		var ifname = document.getElementById("mtu-ifname").value;
+		var mtu = parseInt(document.getElementById("mtu-value").value, 10);
+		if (!ifname || isNaN(mtu)) {
+			log("warn", "Interface と MTU を入力してください。");
+			return;
+		}
+
+		ubusCall("set_mtu", { ifname: ifname, mtu: mtu }, function(result) {
+			log("ok", "set_mtu が完了しました。", result);
+		}, function(err) {
+			log("err", "set_mtu に失敗しました。", { error: err, ifname: ifname });
+		});
+	};
+
+	window.applyFlags = function() {
+		var ifname = document.getElementById("flags-ifname").value;
+		var toSet = (document.getElementById("flags-set").value || "").trim();
+		var toClear = (document.getElementById("flags-clear").value || "").trim();
+
+		if (!ifname) {
+			log("warn", "Interface を入力してください。");
+			return;
+		}
+
+		var payload = { ifname: ifname };
+		payload["flag to set"] = toSet !== "" ? toSet : "0";
+		payload["flag to clear"] = toClear !== "" ? toClear : "0";
+
+		ubusCall("set_if_flags", payload, function(result) {
+			log("ok", "set_if_flags が完了しました。", result);
+		}, function(err) {
+			log("err", "set_if_flags に失敗しました。", { error: err, payload: payload });
+		});
+	};
+
+	document.addEventListener("DOMContentLoaded", loadInterfaces);
+})();
+</script>
+<%+footer%>
+

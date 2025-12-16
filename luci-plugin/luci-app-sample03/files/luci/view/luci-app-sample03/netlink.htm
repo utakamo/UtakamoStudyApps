@@ -1,0 +1,128 @@
+<%+header%>
+<h2><%:Netlink Tool%></h2>
+
+<div class="cbi-section">
+	<h3>Netlink インタフェース一覧</h3>
+	<div class="cbi-section-descr">
+		ubus メソッド <code>netlink-tool list_if</code> の結果を表示します。
+	</div>
+	<div class="cbi-value">
+		<button type="button" class="cbi-button cbi-button-action" onclick="loadNetlink()">最新状態を取得</button>
+	</div>
+	<table class="table" id="netlink-table">
+		<thead>
+			<tr>
+				<th>Index</th>
+				<th>Interface</th>
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+</div>
+
+<div id="netlink-log" class="cbi-section">
+	<h3>ログ</h3>
+	<ul id="netlink-log-list" class="ubus-log"></ul>
+</div>
+
+<style>
+	.ubus-log li {
+		margin-bottom: 6px;
+	}
+	.ubus-log .ok {
+		color: #008000;
+	}
+	.ubus-log .err {
+		color: #cc0000;
+	}
+</style>
+
+<script type="text/javascript">
+(function() {
+	"use strict";
+
+	var apiUrl = '<%=luci.dispatcher.build_url("admin","status","custom-page","api","netlink","call")%>';
+	var tableBody = document.getElementById("netlink-table").querySelector("tbody");
+	var logList = document.getElementById("netlink-log-list");
+
+	function log(type, message, detail) {
+		var li = document.createElement("li");
+		li.className = type;
+		var text = "[" + (new Date()).toLocaleTimeString() + "] " + message;
+		if (detail !== undefined) {
+			try {
+				text += " :: " + JSON.stringify(detail);
+			} catch (e) {
+				/* ignore stringify errors */
+			}
+		}
+		li.textContent = text;
+		if (logList.firstChild) {
+			logList.insertBefore(li, logList.firstChild);
+		} else {
+			logList.appendChild(li);
+		}
+	}
+
+	function ubusCall(method, args, onSuccess, onFailure) {
+		XHR.post(apiUrl, JSON.stringify({ method: method, args: args || {} }), function(xhr, json) {
+			if (xhr.status >= 200 && xhr.status < 300 && json && json.ok) {
+				onSuccess(json.result || {});
+			} else {
+				var msg = (json && json.message) ? json.message : ("HTTP " + xhr.status);
+				if (onFailure) {
+					onFailure(msg);
+				}
+			}
+		}, {
+			headers: { "Content-Type": "application/json" }
+		});
+	}
+
+	window.loadNetlink = function() {
+		ubusCall("list_if", {}, function(result) {
+			tableBody.innerHTML = "";
+			var rows = [];
+
+			if (typeof result === "object" && result !== null) {
+				Object.keys(result).sort().forEach(function(key) {
+					var entry = result[key];
+					if (entry && typeof entry === "object") {
+						rows.push(entry);
+					}
+				});
+			}
+
+			rows.forEach(function(entry) {
+				var tr = document.createElement("tr");
+				var tdIndex = document.createElement("td");
+				tdIndex.textContent = entry.index !== undefined ? entry.index : "-";
+				tr.appendChild(tdIndex);
+
+				var tdIf = document.createElement("td");
+				tdIf.textContent = entry.ifname || "";
+				tr.appendChild(tdIf);
+
+				tableBody.appendChild(tr);
+			});
+
+			if (rows.length === 0) {
+				var tr = document.createElement("tr");
+				var td = document.createElement("td");
+				td.colSpan = 2;
+				td.textContent = "インタフェースが見つかりません。";
+				tr.appendChild(td);
+				tableBody.appendChild(tr);
+			}
+
+			log("ok", "Netlink インタフェース一覧を更新しました。", rows);
+		}, function(err) {
+			log("err", "Netlink インタフェース一覧の取得に失敗しました。", { error: err });
+		});
+	};
+
+	document.addEventListener("DOMContentLoaded", loadNetlink);
+})();
+</script>
+<%+footer%>
+

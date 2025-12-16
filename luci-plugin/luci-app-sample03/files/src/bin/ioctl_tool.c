@@ -261,7 +261,8 @@ int list_if(if_list *list, int max_if_num) {
             break;
         }
 
-        snprintf(list[i].name, IFNAMSIZ, "%s", ifr[i].ifr_name);
+        snprintf(list[i].name, IFNAMSIZ, "%.*s", IFNAMSIZ - 1, ifr[i].ifr_name);
+        list[i].name[IFNAMSIZ - 1] = '\0';
 
         //printf("Interface: %s\n", ifr[i].ifr_name);
 
