@@ -2,12 +2,12 @@
 <h2><%:Netlink Tool%></h2>
 
 <div class="cbi-section">
-	<h3>Netlink インタフェース一覧</h3>
+	<h3>Netlink Interface List</h3>
 	<div class="cbi-section-descr">
-		ubus メソッド <code>netlink-tool list_if</code> の結果を表示します。
+		Shows results of ubus method <code>netlink-tool list_if</code>.
 	</div>
 	<div class="cbi-value">
-		<button type="button" class="cbi-button cbi-button-action" onclick="loadNetlink()">最新状態を取得</button>
+		<button type="button" class="cbi-button cbi-button-action" onclick="loadNetlink()">Refresh</button>
 	</div>
 	<table class="table" id="netlink-table">
 		<thead>
@@ -16,21 +16,50 @@
 				<th>Interface</th>
 			</tr>
 		</thead>
-		<tbody></tbody>
+		<tbody>
+			<tr>
+				<td colspan="2" class="ubus-muted">Click "Refresh" to load.</td>
+			</tr>
+		</tbody>
 	</table>
 </div>
 
+<div class="cbi-section">
+	<h3>Action Result</h3>
+	<div class="cbi-section-descr">
+		Shows the latest result of fetch operations.
+	</div>
+	<pre id="netlink-result" class="ubus-output ubus-output-small">Results will appear after you press a button.</pre>
+</div>
+
 <div id="netlink-log" class="cbi-section">
-	<h3>ログ</h3>
+	<h3>Log</h3>
 	<ul id="netlink-log-list" class="ubus-log"></ul>
 </div>
 
 <style>
+	.ubus-output {
+		background: #f7f7f7;
+		padding: 12px;
+		border: 1px solid #ddd;
+		min-height: 120px;
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+	.ubus-output-small {
+		min-height: 80px;
+	}
+	.ubus-muted {
+		color: #666;
+	}
 	.ubus-log li {
 		margin-bottom: 6px;
 	}
 	.ubus-log .ok {
 		color: #008000;
+	}
+	.ubus-log .warn {
+		color: #aa7a00;
 	}
 	.ubus-log .err {
 		color: #cc0000;
@@ -43,6 +72,7 @@
 
 	var apiUrl = '<%=luci.dispatcher.build_url("admin","status","custom-page","api","netlink","call")%>';
 	var tableBody = document.getElementById("netlink-table").querySelector("tbody");
+	var actionResult = document.getElementById("netlink-result");
 	var logList = document.getElementById("netlink-log-list");
 
 	function log(type, message, detail) {
@@ -62,6 +92,19 @@
 		} else {
 			logList.appendChild(li);
 		}
+	}
+
+	function showResult(title, payload, isError) {
+		var header = isError ? "[ERROR] " : "[OK] ";
+		var output = header + title;
+		if (payload !== undefined) {
+			try {
+				output += "\n" + JSON.stringify(payload, null, 2);
+			} catch (e) {
+				output += "\n" + String(payload);
+			}
+		}
+		actionResult.textContent = output;
 	}
 
 	function ubusCall(method, args, onSuccess, onFailure) {
@@ -110,19 +153,19 @@
 				var tr = document.createElement("tr");
 				var td = document.createElement("td");
 				td.colSpan = 2;
-				td.textContent = "インタフェースが見つかりません。";
+				td.textContent = "No interfaces found.";
+				td.className = "ubus-muted";
 				tr.appendChild(td);
 				tableBody.appendChild(tr);
 			}
 
-			log("ok", "Netlink インタフェース一覧を更新しました。", rows);
+			log("ok", "Netlink interface list updated.", rows);
+			showResult("list_if", rows, false);
 		}, function(err) {
-			log("err", "Netlink インタフェース一覧の取得に失敗しました。", { error: err });
+			log("err", "Failed to retrieve netlink interface list.", { error: err });
+			showResult("list_if", { error: err }, true);
 		});
 	};
-
-	document.addEventListener("DOMContentLoaded", loadNetlink);
 })();
 </script>
 <%+footer%>
-
