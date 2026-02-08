@@ -375,7 +375,7 @@ static const struct blobmsg_policy get_mac_addr_method_policy[] = {
 
 static const struct blobmsg_policy set_mac_addr_method_policy[] = {
 	[UBUS_METHOD_ARGUMENT_1] = { .name="ifname", .type=BLOBMSG_TYPE_STRING },
-	[UBUS_METHOD_ARGUMENT_1] = { .name="mac", .type=BLOBMSG_TYPE_STRING },
+	[UBUS_METHOD_ARGUMENT_2] = { .name="mac", .type=BLOBMSG_TYPE_STRING },
 };
 
 static const struct blobmsg_policy delete_arp_entry_method_policy[] = {
@@ -574,6 +574,8 @@ int add_route_method(struct ubus_context *ctx, struct ubus_object *obj,
 	const char *netmask = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_3]);
 	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_4]);
 
+	blob_buf_init(&blob, 0);
+
 	int result = add_route(dest, gateway, netmask, ifname);
 
 	if (result != 0) {
@@ -594,7 +596,7 @@ int delete_route_method(struct ubus_context *ctx, struct ubus_object *obj,
 	blobmsg_parse(delete_route_method_policy, UBUS_METHOD_ARGUMENT_MAX, tb, blob_data(msg), blob_len(msg));
 
 	if (!tb[UBUS_METHOD_ARGUMENT_1] || !tb[UBUS_METHOD_ARGUMENT_2]
-		|| !tb[UBUS_METHOD_ARGUMENT_3] || !tb[UBUS_METHOD_ARGUMENT_4]){
+		|| !tb[UBUS_METHOD_ARGUMENT_3]){
 		blob_buf_init(&blob, 0);
 		blobmsg_add_string(&blob, "Error", "Mismatch Key");
 		ubus_send_reply(ctx, req, blob.head);
@@ -604,6 +606,8 @@ int delete_route_method(struct ubus_context *ctx, struct ubus_object *obj,
 	const char *dest = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
 	const char *netmask = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_2]);
 	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_3]);
+
+	blob_buf_init(&blob, 0);
 
 	int result = delete_route(dest, netmask, ifname);
 
@@ -654,6 +658,8 @@ int get_ifname_from_idx_method(struct ubus_context *ctx, struct ubus_object *obj
 	char ifname[IFNAMSIZ];
 	int if_idx = blobmsg_get_u32(tb[UBUS_METHOD_ARGUMENT_1]);
 
+	blob_buf_init(&blob, 0);
+
 	int result = get_ifname_from_idx(if_idx, ifname, sizeof(ifname));
 
 	if (result != 0) {
@@ -682,6 +688,8 @@ int set_if_link_method(struct ubus_context *ctx, struct ubus_object *obj,
 
 	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
 	int if_idx = blobmsg_get_u32(tb[UBUS_METHOD_ARGUMENT_2]);
+
+	blob_buf_init(&blob, 0);
 
 	int result = set_if_link(ifname, if_idx);
 
@@ -1291,7 +1299,7 @@ static int set_mac_addr_method(struct ubus_context *ctx, struct ubus_object *obj
 	}
 
 	const char *ifname = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
-	const char *mac = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
+	const char *mac = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_2]);
 
 	blob_buf_init(&blob, 0);
 
@@ -1302,7 +1310,7 @@ static int set_mac_addr_method(struct ubus_context *ctx, struct ubus_object *obj
 	}
 
 	if (strlen(mac) > MAC_ADDRESS_LENGTH) {
-		blobmsg_add_string(&blob, "Error", "Target interface name is too long.");
+		blobmsg_add_string(&blob, "Error", "MAC address is too long.");
 		ubus_send_reply(ctx, req, blob.head);
 		return -1;
 	}
@@ -1342,7 +1350,7 @@ static int delete_arp_entry_method(struct ubus_context *ctx, struct ubus_object 
 		return -1;
 	}
 
-	const char *ip_addr = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_2]);
+	const char *ip_addr = blobmsg_get_string(tb[UBUS_METHOD_ARGUMENT_1]);
 
 	blob_buf_init(&blob, 0);
 
