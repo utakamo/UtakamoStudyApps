@@ -7,7 +7,7 @@ local ubus = require "ubus"
 local function run_ubus(path, method, args)
 	local conn = ubus.connect()
 	if not conn then
-		return false, "ubus に接続できませんでした。"
+		return false, "Failed to connect to ubus."
 	end
 
 	local ok, res = pcall(function()
@@ -62,13 +62,13 @@ function action_ioctl_call()
 	local args = payload.args or {}
 
 	if type(method) ~= "string" or method == "" then
-		respond(false, { ok = false, message = "method が指定されていません。" }, 400)
+		respond(false, { ok = false, message = "Method is not specified." }, 400)
 		return
 	end
 
 	local ok, res = run_ubus("ioctl-tool", method, args)
 	if not ok then
-		respond(false, { ok = false, message = res or "ubus 呼び出しに失敗しました。" }, 500)
+		respond(false, { ok = false, message = res or "ubus call failed." }, 500)
 		return
 	end
 
@@ -81,13 +81,13 @@ function action_netlink_call()
 	local args = payload.args or {}
 
 	if type(method) ~= "string" or method == "" then
-		respond(false, { ok = false, message = "method が指定されていません。" }, 400)
+		respond(false, { ok = false, message = "Method is not specified." }, 400)
 		return
 	end
 
 	local ok, res = run_ubus("netlink-tool", method, args)
 	if not ok then
-		respond(false, { ok = false, message = res or "ubus 呼び出しに失敗しました。" }, 500)
+		respond(false, { ok = false, message = res or "ubus call failed." }, 500)
 		return
 	end
 
