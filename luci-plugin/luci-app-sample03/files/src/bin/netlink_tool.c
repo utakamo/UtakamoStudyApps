@@ -55,36 +55,44 @@ int netlink_list_if(netlink_if_list *list, int max_if_num) {
     }
 
     char buffer[BUFFER_SIZE];
-    ssize_t len = recv(sock_fd, buffer, sizeof(buffer), 0);
-    if (len < 0) {
-        close(sock_fd);
-        return ERR_RECV;
-    }
-
     int item = 0;
-    struct nlmsghdr *nlh = (struct nlmsghdr *)buffer;
-    for (; NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
+    int done = 0;
 
-        if (item >= max_if_num) {
-            break;
+    while (!done) {
+        ssize_t len = recv(sock_fd, buffer, sizeof(buffer), 0);
+        if (len < 0) {
+            close(sock_fd);
+            return ERR_RECV;
         }
 
-        if (nlh->nlmsg_type == NLMSG_DONE) break;
-        if (nlh->nlmsg_type == NLMSG_ERROR) {
-            return ERR_RESPONSE;
-            break;
-        }
+        struct nlmsghdr *nlh = (struct nlmsghdr *)buffer;
+        for (; NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
+            if (item >= max_if_num) {
+                done = 1;
+                break;
+            }
 
-        struct ifinfomsg *ifi = NLMSG_DATA(nlh);
-        struct rtattr *tb[IFLA_MAX + 1];
-        int attr_len = nlh->nlmsg_len - NLMSG_LENGTH(sizeof(struct ifinfomsg));
+            if (nlh->nlmsg_type == NLMSG_DONE) {
+                done = 1;
+                break;
+            }
 
-        parse_rtattr(tb, IFLA_MAX, IFLA_RTA(ifi), attr_len);
+            if (nlh->nlmsg_type == NLMSG_ERROR) {
+                close(sock_fd);
+                return ERR_RESPONSE;
+            }
 
-        if (tb[IFLA_IFNAME]) {
-            list[item].index = ifi->ifi_index;
-            snprintf(list[item].ifname, IFNAMSIZ, "%s", (char *)RTA_DATA(tb[IFLA_IFNAME]));
-            item++;
+            struct ifinfomsg *ifi = NLMSG_DATA(nlh);
+            struct rtattr *tb[IFLA_MAX + 1];
+            int attr_len = nlh->nlmsg_len - NLMSG_LENGTH(sizeof(struct ifinfomsg));
+
+            parse_rtattr(tb, IFLA_MAX, IFLA_RTA(ifi), attr_len);
+
+            if (tb[IFLA_IFNAME]) {
+                list[item].index = ifi->ifi_index;
+                snprintf(list[item].ifname, IFNAMSIZ, "%s", (char *)RTA_DATA(tb[IFLA_IFNAME]));
+                item++;
+            }
         }
     }
 
