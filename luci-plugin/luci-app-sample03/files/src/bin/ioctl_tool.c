@@ -350,6 +350,11 @@ int set_if_flags(const char *ifname, short flags_to_set, short flags_to_clear) {
     memset(&ifr, 0, sizeof(ifr));
     strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
 
+    if (ioctl(sockfd, SIOCGIFFLAGS, &ifr) < 0) {
+        close(sockfd);
+        return ERR_IOCTL;
+    }
+
     ifr.ifr_flags |= flags_to_set;
     ifr.ifr_flags &= ~flags_to_clear;
 
