@@ -2,12 +2,12 @@
 <h2><%:IOCTL Tool%></h2>
 
 <div class="cbi-section">
-	<h3>インタフェース一覧</h3>
+	<h3>Interface List</h3>
 	<div class="cbi-section-descr">
-		ubus メソッド <code>ioctl-tool list_if</code> の結果を表示します。
+		Shows results of ubus method <code>ioctl-tool list_if</code>.
 	</div>
 	<div class="cbi-value">
-		<button type="button" class="cbi-button cbi-button-action" onclick="loadInterfaces()">最新状態を取得</button>
+		<button type="button" class="cbi-button cbi-button-action" onclick="loadInterfaces()">Refresh</button>
 	</div>
 	<table class="table" id="iface-table">
 		<thead>
@@ -16,27 +16,31 @@
 				<th>IPv4 Address</th>
 			</tr>
 		</thead>
-		<tbody></tbody>
+		<tbody>
+			<tr>
+				<td colspan="2" class="ubus-muted">Click "Refresh" to load.</td>
+			</tr>
+		</tbody>
 	</table>
 </div>
 
 <div class="cbi-section">
-	<h3>インタフェース詳細</h3>
+	<h3>Interface Details</h3>
 	<div class="cbi-section-descr">
-		選択したインタフェースに対して複数の IOCTL 取得系メソッドを呼び出します。
+		Calls multiple IOCTL getter methods for the selected interface.
 	</div>
 	<div class="cbi-value">
 		<label for="iface-select">Interface</label>
 		<select id="iface-select"></select>
-		<button type="button" class="cbi-button cbi-button-reload" onclick="inspectInterface()">詳細取得</button>
+		<button type="button" class="cbi-button cbi-button-action" onclick="inspectInterface()">Fetch Details</button>
 	</div>
-	<pre id="iface-details" class="ubus-output">インタフェースを選択して「詳細取得」を押してください。</pre>
+	<pre id="iface-details" class="ubus-output">Select an interface and click "Fetch Details".</pre>
 </div>
 
 <div class="cbi-section">
-	<h3>IPv4 設定</h3>
+	<h3>IPv4 Settings</h3>
 	<div class="cbi-section-descr">
-		IP アドレス / ネットマスク / ブロードキャスト / 宛先アドレスを設定するメソッドを呼び出します。
+		Calls methods to set IP address, netmask, broadcast, and destination.
 	</div>
 	<datalist id="iface-datalist"></datalist>
 	<div class="cbi-value">
@@ -70,9 +74,9 @@
 </div>
 
 <div class="cbi-section">
-	<h3>MTU / フラグ設定</h3>
+	<h3>MTU / Flags Settings</h3>
 	<div class="cbi-section-descr">
-		MTU の変更および IF フラグの設定・解除を行います。フラグは 16 進数で入力してください（例: 0x1）。
+		Change MTU and set/clear IF flags. Enter flags in hex (e.g., 0x1).
 	</div>
 	<div class="cbi-value">
 		<label>Interface</label>
@@ -92,8 +96,16 @@
 	</div>
 </div>
 
+<div class="cbi-section">
+	<h3>Action Result</h3>
+	<div class="cbi-section-descr">
+		Shows the latest result of get/set operations.
+	</div>
+	<pre id="action-result" class="ubus-output ubus-output-small">Results will appear after you press a button.</pre>
+</div>
+
 <div id="ioctl-log" class="cbi-section">
-	<h3>ログ</h3>
+	<h3>Log</h3>
 	<ul id="ioctl-log-list" class="ubus-log"></ul>
 </div>
 
@@ -105,6 +117,12 @@
 		min-height: 120px;
 		white-space: pre-wrap;
 		word-break: break-word;
+	}
+	.ubus-output-small {
+		min-height: 80px;
+	}
+	.ubus-muted {
+		color: #666;
 	}
 	.ubus-log li {
 		margin-bottom: 6px;
@@ -129,6 +147,7 @@
 	var ifaceSelect = document.getElementById("iface-select");
 	var ifaceDetails = document.getElementById("iface-details");
 	var ifaceDatalist = document.getElementById("iface-datalist");
+	var actionResult = document.getElementById("action-result");
 	var logList = document.getElementById("ioctl-log-list");
 
 	function log(type, message, detail) {
@@ -148,6 +167,19 @@
 		} else {
 			logList.appendChild(li);
 		}
+	}
+
+	function showResult(title, payload, isError) {
+		var header = isError ? "[ERROR] " : "[OK] ";
+		var output = header + title;
+		if (payload !== undefined) {
+			try {
+				output += "\n" + JSON.stringify(payload, null, 2);
+			} catch (e) {
+				output += "\n" + String(payload);
+			}
+		}
+		actionResult.textContent = output;
 	}
 
 	function ubusCall(method, args, onSuccess, onFailure) {
@@ -210,25 +242,28 @@
 
 			if (rows.length > 0) {
 				ifaceSelect.value = rows[0].interface;
-				ifaceDetails.textContent = "インタフェースを選択して「詳細取得」を押してください。";
+				ifaceDetails.textContent = "Select an interface and click \"Fetch Details\".";
 			} else {
-				ifaceDetails.textContent = "インタフェースが見つかりません。";
+				ifaceTableBody.innerHTML = '<tr><td colspan="2" class="ubus-muted">No interfaces found.</td></tr>';
+				ifaceDetails.textContent = "No interfaces found.";
 			}
 
-			log("ok", "インタフェース一覧を更新しました。", rows);
+			log("ok", "Interface list updated.", rows);
+			showResult("list_if", rows, false);
 		}, function(err) {
-			log("err", "インタフェース一覧の取得に失敗しました。", { error: err });
+			log("err", "Failed to retrieve interface list.", { error: err });
+			showResult("list_if", { error: err }, true);
 		});
 	};
 
 	window.inspectInterface = function() {
 		var ifname = ifaceSelect.value;
 		if (!ifname) {
-			log("warn", "インタフェースが選択されていません。");
+			log("warn", "No interface selected.");
 			return;
 		}
 
-		ifaceDetails.textContent = "取得中...";
+		ifaceDetails.textContent = "Loading...";
 
 		var tasks = [
 			["get_if_flags", { ifname: ifname }],
@@ -248,7 +283,8 @@
 			remaining--;
 			if (remaining <= 0) {
 				ifaceDetails.textContent = JSON.stringify(collected, null, 2);
-				log("ok", ifname + " の情報を取得しました。", collected);
+				log("ok", "Retrieved details for " + ifname + ".", collected);
+				showResult("inspect_interface", collected, false);
 			}
 		}
 
@@ -260,7 +296,7 @@
 				done();
 			}, function(err) {
 				collected[method] = { error: err };
-				log("err", method + " の取得に失敗しました。", { ifname: ifname, error: err });
+				log("err", "Failed to retrieve " + method + ".", { ifname: ifname, error: err });
 				done();
 			});
 		});
@@ -270,7 +306,7 @@
 		var ifname = document.getElementById("ip-ifname").value;
 		var ip = document.getElementById("ip-address").value;
 		if (!ifname || !ip) {
-			log("warn", "Interface と IPv4 を入力してください。");
+			log("warn", "Enter Interface and IPv4.");
 			return;
 		}
 
@@ -278,9 +314,11 @@
 		payload["ip address"] = ip;
 
 		ubusCall("set_if_ipv4", payload, function(result) {
-			log("ok", "set_if_ipv4 が完了しました。", result);
+			log("ok", "set_if_ipv4 completed.", result);
+			showResult("set_if_ipv4", result, false);
 		}, function(err) {
-			log("err", "set_if_ipv4 に失敗しました。", { error: err, payload: payload });
+			log("err", "set_if_ipv4 failed.", { error: err, payload: payload });
+			showResult("set_if_ipv4", { error: err, payload: payload }, true);
 		});
 	};
 
@@ -288,14 +326,16 @@
 		var ifname = document.getElementById("netmask-ifname").value;
 		var netmask = document.getElementById("netmask-value").value;
 		if (!ifname || !netmask) {
-			log("warn", "Interface と Netmask を入力してください。");
+			log("warn", "Enter Interface and Netmask.");
 			return;
 		}
 
 		ubusCall("set_netmask", { ifname: ifname, netmask: netmask }, function(result) {
-			log("ok", "set_netmask が完了しました。", result);
+			log("ok", "set_netmask completed.", result);
+			showResult("set_netmask", result, false);
 		}, function(err) {
-			log("err", "set_netmask に失敗しました。", { error: err, ifname: ifname });
+			log("err", "set_netmask failed.", { error: err, ifname: ifname });
+			showResult("set_netmask", { error: err, ifname: ifname }, true);
 		});
 	};
 
@@ -303,14 +343,16 @@
 		var ifname = document.getElementById("bcast-ifname").value;
 		var bcast = document.getElementById("bcast-value").value;
 		if (!ifname || !bcast) {
-			log("warn", "Interface と Broadcast を入力してください。");
+			log("warn", "Enter Interface and Broadcast.");
 			return;
 		}
 
 		ubusCall("set_bcast_addr", { ifname: ifname, bcastaddr: bcast }, function(result) {
-			log("ok", "set_bcast_addr が完了しました。", result);
+			log("ok", "set_bcast_addr completed.", result);
+			showResult("set_bcast_addr", result, false);
 		}, function(err) {
-			log("err", "set_bcast_addr に失敗しました。", { error: err, ifname: ifname });
+			log("err", "set_bcast_addr failed.", { error: err, ifname: ifname });
+			showResult("set_bcast_addr", { error: err, ifname: ifname }, true);
 		});
 	};
 
@@ -318,14 +360,16 @@
 		var ifname = document.getElementById("dest-ifname").value;
 		var dest = document.getElementById("dest-value").value;
 		if (!ifname || !dest) {
-			log("warn", "Interface と Destination を入力してください。");
+			log("warn", "Enter Interface and Destination.");
 			return;
 		}
 
 		ubusCall("set_dest_addr", { ifname: ifname, ipaddr: dest }, function(result) {
-			log("ok", "set_dest_addr が完了しました。", result);
+			log("ok", "set_dest_addr completed.", result);
+			showResult("set_dest_addr", result, false);
 		}, function(err) {
-			log("err", "set_dest_addr に失敗しました。", { error: err, ifname: ifname });
+			log("err", "set_dest_addr failed.", { error: err, ifname: ifname });
+			showResult("set_dest_addr", { error: err, ifname: ifname }, true);
 		});
 	};
 
@@ -333,14 +377,16 @@
 		var ifname = document.getElementById("mtu-ifname").value;
 		var mtu = parseInt(document.getElementById("mtu-value").value, 10);
 		if (!ifname || isNaN(mtu)) {
-			log("warn", "Interface と MTU を入力してください。");
+			log("warn", "Enter Interface and MTU.");
 			return;
 		}
 
 		ubusCall("set_mtu", { ifname: ifname, mtu: mtu }, function(result) {
-			log("ok", "set_mtu が完了しました。", result);
+			log("ok", "set_mtu completed.", result);
+			showResult("set_mtu", result, false);
 		}, function(err) {
-			log("err", "set_mtu に失敗しました。", { error: err, ifname: ifname });
+			log("err", "set_mtu failed.", { error: err, ifname: ifname });
+			showResult("set_mtu", { error: err, ifname: ifname }, true);
 		});
 	};
 
@@ -350,7 +396,7 @@
 		var toClear = (document.getElementById("flags-clear").value || "").trim();
 
 		if (!ifname) {
-			log("warn", "Interface を入力してください。");
+			log("warn", "Enter Interface.");
 			return;
 		}
 
@@ -359,14 +405,13 @@
 		payload["flag to clear"] = toClear !== "" ? toClear : "0";
 
 		ubusCall("set_if_flags", payload, function(result) {
-			log("ok", "set_if_flags が完了しました。", result);
+			log("ok", "set_if_flags completed.", result);
+			showResult("set_if_flags", result, false);
 		}, function(err) {
-			log("err", "set_if_flags に失敗しました。", { error: err, payload: payload });
+			log("err", "set_if_flags failed.", { error: err, payload: payload });
+			showResult("set_if_flags", { error: err, payload: payload }, true);
 		});
 	};
-
-	document.addEventListener("DOMContentLoaded", loadInterfaces);
 })();
 </script>
 <%+footer%>
-
